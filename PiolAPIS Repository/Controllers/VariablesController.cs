@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
-using PiolAPIS_Repository.Models.Enums;
+using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Controllers
 {
@@ -47,7 +47,7 @@ namespace PiolAPIS_Repository.Controllers
             // var variable = await _repository.GetByIdAsync(id);
             // if (variable == null) return NotFound($"No se encontró la variable con ID: {id}");
 
-            var tipoDato = new TipoDato();
+            var tipoDato = new DataType();
 
             Variable modeloSimulado = new()
             {

@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
-using PiolAPIS_Repository.Models.Enums;
+using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/plantillas-dtos")]
-    public class PlantillasDTOController : Controller
+    public class TemplateDTOsController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<PlantillasDTOs>> Post([FromBody] PlantillasDTOs modelo)
+        public async Task<ActionResult<TemplateDTOs>> Post([FromBody] TemplateDTOs modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -25,7 +25,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlantillasDTOs>>> Get([FromQuery] char? language, [FromQuery] string? tag)
+        public async Task<ActionResult<IEnumerable<TemplateDTOs>>> Get([FromQuery] char? language, [FromQuery] string? tag)
         {
             // TODO: Implementar búsqueda con LINQ eficiente usando los nuevos campos
             // IQueryable<PlantillasDTOs> query = _repository.AsQueryable().Where(p => p.IsShared);
@@ -33,27 +33,27 @@ namespace PiolAPIS_Repository.Controllers
             // if (!string.IsNullOrEmpty(tag)) query = query.Where(p => p.Tags.Contains(tag));
             // var lista = await query.ToListAsync();
 
-            List<PlantillasDTOs> listaSimulada = [];
+            List<TemplateDTOs> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<PlantillasDTOs>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<TemplateDTOs>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar plantilla en base de datos por ID
             // var plantilla = await _repository.GetByIdAsync(id);
             // if (plantilla == null) return NotFound($"No se encontró la plantilla con ID: {id}");
 
-            PlantillasDTOs modeloSimulado = new()
+            TemplateDTOs modeloSimulado = new()
             {
                 Id = id,
                 Name = "PagedResponseDTO",
                 Description = "Estructura estándar global para respuestas paginadas en la organización.",
-                RequestType = (char)TipoPeticion.GET,
+                RequestType = (char)RequestType.GET,
                 Request = string.Empty,
                 Response = "{ \"PageNumber\": 1, \"PageSize\": 10, \"TotalRecords\": 100, \"Data\": [] }",
-                ResponseType = (char)TipoDocumentacion.JSON,
+                ResponseType = (char)DocumentationType.JSON,
                 IsShared = true,
                 Tags = "Pagination,Standard",
                 IsActive = true,
@@ -65,7 +65,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] PlantillasDTOs modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] TemplateDTOs modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID de la plantilla provista.");
@@ -89,7 +89,7 @@ namespace PiolAPIS_Repository.Controllers
 
         [HttpPost("importar-estructura")]
         [Consumes("multipart/form-data")]
-        public async Task<ActionResult<PlantillasDTOs>> ImportarEstructura([FromForm] PlantillasDTOs modelo)
+        public async Task<ActionResult<TemplateDTOs>> ImportarEstructura([FromForm] TemplateDTOs modelo)
         {
             if (modelo.File == null || modelo.File.Length == 0)
                 return BadRequest("Se debe adjuntar un archivo válido para extraer la estructura.");
@@ -102,10 +102,10 @@ namespace PiolAPIS_Repository.Controllers
 
                 // var contratoExtraido = _contractParser.Parse(contenidoArchivo);
 
-                modelo.RequestType = (char)TipoPeticion.POST;
+                modelo.RequestType = (char)RequestType.POST;
                 modelo.Request = "{ \"id\": 0, \"nombre\": \"string\" }"; // Extraído del archivo
                 modelo.Response = "{ \"status\": \"success\", \"data\": { \"id\": 123 } }"; // Extraído del archivo
-                modelo.ResponseType = (char)TipoDocumentacion.JSON;
+                modelo.ResponseType = (char)DocumentationType.JSON;
                 modelo.Name = Path.GetFileNameWithoutExtension(modelo.File.FileName);
 
                 return Ok(modelo);

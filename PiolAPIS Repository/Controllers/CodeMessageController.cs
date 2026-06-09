@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
-using PiolAPIS_Repository.Models.Enums;
+using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/mensajes-codigos")]
-    public class CodigoMensajeController : Controller
+    public class CodeMessageController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<CodigoMensaje>> Post([FromBody] CodigoMensaje modelo)
+        public async Task<ActionResult<CodeMessage>> Post([FromBody] CodeMessage modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -25,31 +25,31 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CodigoMensaje>>> Get()
+        public async Task<ActionResult<IEnumerable<CodeMessage>>> Get()
         {
             // TODO: Consultar el diccionario de respuestas parametrizadas de la BD de forma asíncrona
             // var codigos = await _repository.GetAllAsync();
 
-            List<CodigoMensaje> listaSimulada = [];
+            List<CodeMessage> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<CodigoMensaje>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<CodeMessage>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar el código parametrizado por su GUID
             // var codigo = await _repository.GetByIdAsync(id);
             // if (codigo == null) return NotFound($"No se encontró el código de mensaje con ID: {id}");
 
-            CodigoMensaje modeloSimulado = new()
+            CodeMessage modeloSimulado = new()
             {
                 Id = id,
                 Name = "ERR_USER_NOT_FOUND",
                 Description = "Error global cuando un identificador de usuario no existe en el sistema.",
                 HTTP_code = "404",
                 Response = "{ \"code\": \"404\", \"message\": \"El recurso solicitado no fue hallado.\" }",
-                ResponseType = (char)TipoDocumentacion.JSON, // 'J' para JSON, 'S' para Schema, etc
+                ResponseType = (char)DocumentationType.JSON, // 'J' para JSON, 'S' para Schema, etc
                 IsActive = true,                                             
                 CreatedDate = DateTime.UtcNow.AddMonths(-1),
                 UpdatedDate = DateTime.UtcNow
@@ -59,7 +59,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] CodigoMensaje modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] CodeMessage modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID del modelo enviado.");

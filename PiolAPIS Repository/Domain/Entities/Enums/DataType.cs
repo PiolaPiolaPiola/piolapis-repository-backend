@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Diagnostics.HealthChecks;
 
-namespace PiolAPIS_Repository.Models.Enums
+namespace PiolAPIS_Repository.Domain.Entities.Enums
 {
-    public class TipoDato
+    public class DataType
     {
         public string String = "String";
         public string Int = "Int";

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
+using PiolAPIS_Repository.Domain.Entities;
 using System.Reflection;
 
 namespace PiolAPIS_Repository.Controllers

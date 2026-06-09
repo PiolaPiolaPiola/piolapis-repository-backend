@@ -1,6 +1,6 @@
-﻿namespace PiolAPIS_Repository.Models
+﻿namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class Documentacion : Base
+    public class Documentation : Base
     {
         public Guid? Id { get; set; }
 

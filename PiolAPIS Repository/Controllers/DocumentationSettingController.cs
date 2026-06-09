@@ -1,15 +1,15 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
-using PiolAPIS_Repository.Models.Enums;
+using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/configuraciones-documentacion")]
-    public class ConfiguracionDocumentacionController : Controller
+    public class DocumentationSettingController : Controller
     {
-        public async Task<ActionResult<ConfiguracionDocumentacion>> Post([FromBody] ConfiguracionDocumentacion modelo)
+        public async Task<ActionResult<DocumentationSetting>> Post([FromBody] DocumentationSetting modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -26,40 +26,40 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ConfiguracionDocumentacion>>> Get()
+        public async Task<ActionResult<IEnumerable<DocumentationSetting>>> Get()
         {
             // TODO: Consultar masivamente usando LINQ
             // var lista = await _repository.GetAllAsync();
 
-            List<ConfiguracionDocumentacion> listaSimulada = [];
+            List<DocumentationSetting> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id}")] 
-        public async Task<ActionResult<ConfiguracionDocumentacion>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<DocumentationSetting>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar por Id (string) en la BD
             // var configuracion = await _repository.GetByIdAsync(id);
             // if (configuracion == null) return NotFound($"No se encontró la configuración con ID: {id}");
 
-            ConfiguracionDocumentacion modeloSimulado = new()
+            DocumentationSetting modeloSimulado = new()
             {
                 Id = id,
                 Name = "Configuración Estándar Enterprise",
-                Type = (char)TipoDocumentacion.JSON,
+                Type = (char)DocumentationType.JSON,
                 ProyectoId = Guid.NewGuid(),
                 Description = "Formato base para microservicios core",
                 IsActive = true,
                 BaseEndpoint = "https://api.enterprise.com/v1",
-                ApiType = (char)TipoApi.REST
+                ApiType = (char)ApiType.REST
             };
 
             return Ok(modeloSimulado);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] ConfiguracionDocumentacion modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] DocumentationSetting modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID del modelo enviado.");
@@ -72,7 +72,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPatch("{id}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] ConfiguracionDocumentacion modeloEstado)
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] DocumentationSetting modeloEstado)
         {
             // TODO: Recuperar entidad de la BD, actualizar solo el campo de estado y guardar cambios
             // var modificado = await _repository.CambiarEstadoAsync(id, modeloEstado.Type);

@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
+using PiolAPIS_Repository.Domain.Entities;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/documentaciones")]
-    public class DocumentacionController : Controller
+    public class DocumentationController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<Documentacion>> Post([FromBody] Documentacion modelo)
+        public async Task<ActionResult<Documentation>> Post([FromBody] Documentation modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -25,25 +25,25 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Documentacion>>> Get([FromQuery] Guid? proyectoId)
+        public async Task<ActionResult<IEnumerable<Documentation>>> Get([FromQuery] Guid? proyectoId)
         {
             // TODO: Implementar búsqueda con LINQ eficiente
             // IQueryable<Documentacion> query = _repository.AsQueryable();
             // if (proyectoId.HasValue) query = query.Where(d => d.ProyectoId == proyectoId.Value);
             // var lista = await query.ToListAsync();
 
-            List<Documentacion> listaSimulada = [];
+            List<Documentation> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Documentacion>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Documentation>> GetById([FromRoute] Guid id)
         {
             // var documentacion = await _repository.GetByIdCompleteAsync(id);
             // if (documentacion == null) return NotFound($"No existe documentación con el ID: {id}");
 
-            Documentacion modeloSimulado = new()
+            Documentation modeloSimulado = new()
             {
                 Id = id,
                 ProyectoId = Guid.NewGuid(),
@@ -61,7 +61,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Documentacion modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Documentation modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID del cuerpo de la petición.");
@@ -75,7 +75,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPatch("{id:guid}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] Documentacion modeloEstado)
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] Documentation modeloEstado)
         {
             // var modificado = await _repository.CambiarStatusAsync(id, modeloEstado.Status);
             // if (!modificado) return NotFound();

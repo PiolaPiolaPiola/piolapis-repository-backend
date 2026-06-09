@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PiolAPIS_Repository.Models
+namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class PlantillasDTOs : Base
+    public class TemplateDTOs : Base
     {
         public char RequestType { get; set; } //Si es Post, Put, etc
         public string Request { get; set; } //Estructura completa con las propiedades para peticiones POST

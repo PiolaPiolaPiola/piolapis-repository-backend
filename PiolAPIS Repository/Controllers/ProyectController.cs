@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PiolAPIS_Repository.Models;
+using PiolAPIS_Repository.Domain.Entities;
 
 namespace PiolAPIS_Repository.Controllers
 {
-    public class ProyectoController : Controller
+    public class ProyectController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<Proyecto>> Post([FromBody] Proyecto modelo)
+        public async Task<ActionResult<Proyect>> Post([FromBody] Proyect modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -23,24 +23,24 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Proyecto>>> Get()
+        public async Task<ActionResult<IEnumerable<Proyect>>> Get()
         {
             // TODO: Consultar proyectos que no estén eliminados lógicamente
             // var proyectos = await _proyectoRepository.GetActivosAsync();
 
-            List<Proyecto> listaSimulada = [];
+            List<Proyect> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Proyecto>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Proyect>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar el proyecto por su ID e incluir el árbol de APIs vinculadas (.Include(p => p.Apis) con EF Core)
             // var proyecto = await _proyectoRepository.GetByIdWithApisAsync(id);
             // if (proyecto == null) return NotFound($"No se encontró el proyecto con ID: {id}");
 
-            Proyecto modeloSimulado = new()
+            Proyect modeloSimulado = new()
             {
                 Id = id,
                 Name = "Proyecto Core E-Commerce",
@@ -55,7 +55,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Proyecto modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Proyect modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID del proyecto enviado.");

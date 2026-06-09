@@ -1,6 +1,6 @@
-﻿namespace PiolAPIS_Repository.Models.Enums
+﻿namespace PiolAPIS_Repository.Domain.Entities.Enums
 {
-    public enum TipoPeticion
+    public enum RequestType
     {
         POST = 0,
         GET = 1,

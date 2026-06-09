@@ -1,4 +1,4 @@
-﻿namespace PiolAPIS_Repository.Models
+﻿namespace PiolAPIS_Repository.Domain.Entities
 {
     public class Variable :Base
     {
