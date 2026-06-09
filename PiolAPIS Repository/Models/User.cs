@@ -1,0 +1,11 @@
+﻿using System;
+
+namespace PiolAPIS_Repository.Models
+{
+    public class User : Base
+    {
+        public string Role { get; set; }
+        public string LastName { get; set; }
+        public string FullName => $"{Name} {LastName}";
+    }
+}
