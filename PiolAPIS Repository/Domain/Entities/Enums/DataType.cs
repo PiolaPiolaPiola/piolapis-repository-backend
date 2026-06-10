@@ -4,8 +4,8 @@ namespace PiolAPIS_Repository.Domain.Entities.Enums
 {
     public class DataType
     {
-        public string String = "String";
-        public string Int = "Int";
-        public string Bool = "Bool";
+        public const string String = "String";
+        public const string Int = "Int";
+        public const string Bool = "Bool";
     }
 }

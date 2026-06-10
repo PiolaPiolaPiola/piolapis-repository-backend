@@ -1,47 +1,70 @@
 ﻿namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class Base
+    public abstract class Base 
     {
-        public Guid? Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public char? Type { get; set; }
-        public string Code { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime? UpdatedDate { get; set; }
+        public Guid Id { get; private set; }
+        public string Name { get; private set; } = string.Empty;
+        public string Description { get; private set; } = string.Empty;
+        public char? Type { get; private set; }
+        public string Code { get; private set; } = string.Empty;
+        public bool IsActive { get; private set; }
+        public DateTime CreatedDate { get; private set; }
+        public DateTime? UpdatedDate { get; private set; }
 
-        public Base()
-        {
-
-        }
+        protected Base() { }
 
         public Base(Guid? id, string name, string description, char? type, string code, bool isActive, DateTime? createdDate, DateTime? updatedDate)
         {
             Id = id ?? Guid.NewGuid();
 
-            if (string.IsNullOrWhiteSpace(name) || name.Length <= 0)
-            {
-                throw new ArgumentNullException("El nombre es obligatorio");
-            }
+            ValidateName(name);
+            ValidateDescription(description);
 
-            if (name.Length > 100)
-            {
-                throw new ArgumentException("El nombre debe tener máximo 100 caracteres");
-            }
-
-            if (string.IsNullOrWhiteSpace(description))
-            {
-                throw new ArgumentNullException("La descripción es obligatoria");
-            }
-
-            Name = name ?? string.Empty;
-            Description = description ?? string.Empty;
+            Name = name.Trim();
+            Description = description.Trim();
             Type = type;
-            Code = code;
+            Code = code ?? string.Empty;
             IsActive = isActive;
             CreatedDate = createdDate ?? DateTime.UtcNow;
-            UpdatedDate = updatedDate ?? DateTime.UtcNow;
+            UpdatedDate = updatedDate;
+        }
+
+        public void UpdateMetadata(string name, string description, string code)
+        {
+            ValidateName(name);
+            ValidateDescription(description);
+
+            Name = name.Trim();
+            Description = description.Trim();
+            Code = code;
+            UpdatedDate = DateTime.UtcNow; 
+        }
+
+        public void Deactivate()
+        {
+            IsActive = false;
+            UpdatedDate = DateTime.UtcNow;
+        }
+
+        public void Activate()
+        {
+            IsActive = true;
+            UpdatedDate = DateTime.UtcNow;
+        }
+
+        private static void ValidateName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("El nombre es obligatorio.");
+
+            if (name.Length > 100)
+                throw new ArgumentException("El nombre debe tener máximo 100 caracteres.");
+        }
+
+        private static void ValidateDescription(string description)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+                throw new ArgumentException("La descripción es obligatoria.");
         }
     }
 }

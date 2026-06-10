@@ -47,14 +47,12 @@ namespace PiolAPIS_Repository.Controllers
             // var variable = await _repository.GetByIdAsync(id);
             // if (variable == null) return NotFound($"No se encontró la variable con ID: {id}");
 
-            var tipoDato = new DataType();
-
             Variable modeloSimulado = new()
             {
                 Id = id,
                 Name = "Code",
                 Description = "Código alfanumérico estandarizado para identificar registros del sistema.",
-                DataType = tipoDato.String,
+                DataType = DataType.String,
                 ExampleValue = "DOC-2026-XYZ",
                 IsActive = true,
                 CreatedDate = DateTime.UtcNow.AddMonths(-2),
