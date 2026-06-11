@@ -14,15 +14,12 @@ namespace PiolAPIS_Repository.Domain.Entities
             Guid? id,
             string name,
             string description,
-            char? type,
-            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string baseEndpoint,
             char apiType,
             Guid proyectoId)
-            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             if (proyectoId == Guid.Empty)
                 throw new ArgumentException("El ProyectoId debe ser válido.");

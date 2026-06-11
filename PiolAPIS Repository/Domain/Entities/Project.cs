@@ -14,12 +14,9 @@
             Guid? id,
             string name,
             string description,
-            char? type,
-            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate)
-            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
         }
 

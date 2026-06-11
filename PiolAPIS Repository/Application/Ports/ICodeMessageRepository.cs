@@ -4,10 +4,10 @@ namespace PiolAPIS_Repository.Application.Ports
 {
     public interface ICodeMessageRepository
     {
-        void Save(CodeMessage codeMessage);
-        IList<CodeMessage> GetAll(string rol);
-        CodeMessage GetById(Guid id);
-        void Update(CodeMessage codeMessage);
-        void UpdateStatus(Guid id, bool status);
+        Task SaveAsync(CodeMessage codeMessage);
+        Task UpdateAsync(CodeMessage codeMessage);
+        Task<bool> ChangeStatusAsync(Guid id, bool isActive);
+        Task<CodeMessage?> GetByIdAsync(Guid id); 
+        Task<IEnumerable<CodeMessage>> GetAllByHttpCodeAsync(string httpCode);
     }
 }

@@ -45,21 +45,20 @@ namespace PiolAPIS_Repository.Controllers
             // var plantilla = await _repository.GetByIdAsync(id);
             // if (plantilla == null) return NotFound($"No se encontró la plantilla con ID: {id}");
 
-            TemplateDTOs modeloSimulado = new()
-            {
-                Id = id,
-                Name = "PagedResponseDTO",
-                Description = "Estructura estándar global para respuestas paginadas en la organización.",
-                RequestType = (char)RequestType.GET,
-                Request = string.Empty,
-                Response = "{ \"PageNumber\": 1, \"PageSize\": 10, \"TotalRecords\": 100, \"Data\": [] }",
-                ResponseType = (char)DocumentationType.JSON,
-                IsShared = true,
-                Tags = "Pagination,Standard",
-                IsActive = true,
-                CreatedDate = DateTime.UtcNow.AddDays(-5),
-                UpdatedDate = DateTime.UtcNow
-            };
+            TemplateDTOs modeloSimulado = new TemplateDTOs(
+                    id: id,
+                    name: "PagedResponseDTO",
+                    description: "Estructura estándar global para respuestas paginadas en la organización.",
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddDays(-5),
+                    updatedDate: DateTime.UtcNow,
+                    requestType: (char)RequestType.GET, 
+                    request: string.Empty,
+                    response: "{ \"PageNumber\": 1, \"PageSize\": 10, \"TotalRecords\": 100, \"Data\": [] }",
+                    responseType: (char)DocumentationType.JSON, 
+                    isShared: true,
+                    tags: "Pagination,Standard"
+                );
 
             return Ok(modeloSimulado);
         }

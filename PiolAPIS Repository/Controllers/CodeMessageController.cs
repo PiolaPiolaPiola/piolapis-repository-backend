@@ -42,18 +42,17 @@ namespace PiolAPIS_Repository.Controllers
             // var codigo = await _repository.GetByIdAsync(id);
             // if (codigo == null) return NotFound($"No se encontró el código de mensaje con ID: {id}");
 
-            CodeMessage modeloSimulado = new()
-            {
-                Id = id,
-                Name = "ERR_USER_NOT_FOUND",
-                Description = "Error global cuando un identificador de usuario no existe en el sistema.",
-                HTTP_code = "404",
-                Response = "{ \"code\": \"404\", \"message\": \"El recurso solicitado no fue hallado.\" }",
-                ResponseType = (char)DocumentationType.JSON, // 'J' para JSON, 'S' para Schema, etc
-                IsActive = true,                                             
-                CreatedDate = DateTime.UtcNow.AddMonths(-1),
-                UpdatedDate = DateTime.UtcNow
-            };
+            CodeMessage modeloSimulado = new CodeMessage(
+                id: id,
+                name: "ERR_USER_NOT_FOUND",
+                description: "Error global cuando un identificador de usuario no existe en el sistema.",
+                isActive: true,
+                createdDate: DateTime.UtcNow.AddMonths(-1),
+                updatedDate: DateTime.UtcNow,
+                httpCode: "404",
+                response: "{ \"code\": \"404\", \"message\": \"El recurso solicitado no fue hallado.\" }",
+                responseType: (char)DocumentationType.JSON
+            );
 
             return Ok(modeloSimulado);
         }

@@ -55,13 +55,16 @@ namespace PiolAPIS_Repository.Controllers
             // var usuario = await _userRepository.GetByIdAsync(id);
             // if (usuario == null) return NotFound();
 
-            User usuarioSimulado = new()
-            {
-                Id = id,
-                Name = "Usuario",
-                LastName = "Prueba",
-                Role = "Admin"
-            };
+            User usuarioSimulado = new User(
+                    id: id,
+                    name: "Usuario",
+                    description: "Usuario administrador inicial del sistema de catálogo.", 
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddMonths(-3),
+                    updatedDate: DateTime.UtcNow,
+                    lastName: "Prueba",
+                    role: "Admin"
+                );
 
             return Ok(usuarioSimulado);
         }

@@ -4,10 +4,10 @@ using PiolAPIS_Repository.Domain.Entities;
 
 namespace PiolAPIS_Repository.Controllers
 {
-    public class ProyectController : Controller
+    public class ProjectController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<Proyect>> Post([FromBody] Proyect modelo)
+        public async Task<ActionResult<Project>> Post([FromBody] Project modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -23,39 +23,37 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Proyect>>> Get()
+        public async Task<ActionResult<IEnumerable<Project>>> Get()
         {
             // TODO: Consultar proyectos que no estén eliminados lógicamente
             // var proyectos = await _proyectoRepository.GetActivosAsync();
 
-            List<Proyect> listaSimulada = [];
+            List<Project> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Proyect>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Project>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar el proyecto por su ID e incluir el árbol de APIs vinculadas (.Include(p => p.Apis) con EF Core)
             // var proyecto = await _proyectoRepository.GetByIdWithApisAsync(id);
             // if (proyecto == null) return NotFound($"No se encontró el proyecto con ID: {id}");
 
-            Proyect modeloSimulado = new()
-            {
-                Id = id,
-                Name = "Proyecto Core E-Commerce",
-                Description = "Contenedor principal para las APIs de Checkout, Catálogo y Pagos.",
-                Code = "PRJ-ECOMM-01",
-                IsActive = true,
-                CreatedDate = DateTime.UtcNow.AddDays(-10),
-                UpdatedDate = DateTime.UtcNow
-            };
+            Project modeloSimulado = new Project(
+                    id: id,
+                    name: "Proyecto Core E-Commerce",
+                    description: "Contenedor principal para las APIs de Checkout, Catálogo y Pagos.",
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddDays(-10),
+                    updatedDate: DateTime.UtcNow
+                );
 
             return Ok(modeloSimulado);
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Proyect modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Project modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID del proyecto enviado.");

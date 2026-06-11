@@ -43,19 +43,18 @@ namespace PiolAPIS_Repository.Controllers
             // var documentacion = await _repository.GetByIdCompleteAsync(id);
             // if (documentacion == null) return NotFound($"No existe documentación con el ID: {id}");
 
-            Documentation modeloSimulado = new()
-            {
-                Id = id,
-                ProyectoId = Guid.NewGuid(),
-                ConfiguracionDocumentacionId = Guid.NewGuid(),
-                PlantillaDtoId = Guid.NewGuid(),
-                Name = "V1/Checkout/Process-Payment",
-                Description = "Documentación del contrato base para la integración con pasarelas de pago.",
-                Version = "1.0.4",
-                IsActive = true, 
-                CreatedDate = DateTime.UtcNow.AddMonths(-1),
-                UpdatedDate = DateTime.UtcNow
-            };
+            Documentation modeloSimulado = new Documentation(
+                    id: id,
+                    name: "V1/Checkout/Process-Payment",
+                    description: "Documentación del contrato base para la integración con pasarelas de pago.",
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddMonths(-1),
+                    updatedDate: DateTime.UtcNow,
+                    proyectoId: Guid.NewGuid(), 
+                    configuracionDocumentacionId: Guid.NewGuid(),
+                    plantillaDtoId: Guid.NewGuid(),
+                    version: "1.0.4"
+                );
 
             return Ok(modeloSimulado);
         }

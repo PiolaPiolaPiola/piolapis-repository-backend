@@ -43,17 +43,17 @@ namespace PiolAPIS_Repository.Controllers
             // var configuracion = await _repository.GetByIdAsync(id);
             // if (configuracion == null) return NotFound($"No se encontró la configuración con ID: {id}");
 
-            DocumentationSetting modeloSimulado = new()
-            {
-                Id = id,
-                Name = "Configuración Estándar Enterprise",
-                Type = (char)DocumentationType.JSON,
-                ProyectoId = Guid.NewGuid(),
-                Description = "Formato base para microservicios core",
-                IsActive = true,
-                BaseEndpoint = "https://api.enterprise.com/v1",
-                ApiType = (char)ApiType.REST
-            };
+            DocumentationSetting modeloSimulado = new DocumentationSetting(
+                    id: id,
+                    name: "Configuración Estándar Enterprise",
+                    description: "Formato base para microservicios core",
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddMonths(-1),
+                    updatedDate: DateTime.UtcNow,
+                    baseEndpoint: "https://api.enterprise.com/v1",
+                    apiType: (char)ApiType.REST, 
+                    proyectoId: Guid.NewGuid() 
+                );
 
             return Ok(modeloSimulado);
         }

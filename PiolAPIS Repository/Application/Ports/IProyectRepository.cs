@@ -4,10 +4,10 @@ namespace PiolAPIS_Repository.Application.Ports
 {
     public interface IProyectRepository
     {
-        void Save(Proyect proyect);
-        IList<Proyect> GetAll();
-        Variable GetById(Guid id);
-        void Update(Proyect proyect);
-        void UpdateStatus(Guid id, bool status);
+        Task SaveAsync(Project project);
+        Task UpdateAsync(Project project);
+        Task<bool> ChangeStatusAsync(Guid id, bool isActive);
+        Task<Project?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Project>> GetAllAsync();
     }
 }

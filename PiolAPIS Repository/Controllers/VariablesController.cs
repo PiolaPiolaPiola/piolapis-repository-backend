@@ -47,17 +47,16 @@ namespace PiolAPIS_Repository.Controllers
             // var variable = await _repository.GetByIdAsync(id);
             // if (variable == null) return NotFound($"No se encontró la variable con ID: {id}");
 
-            Variable modeloSimulado = new()
-            {
-                Id = id,
-                Name = "Code",
-                Description = "Código alfanumérico estandarizado para identificar registros del sistema.",
-                DataType = DataType.String,
-                ExampleValue = "DOC-2026-XYZ",
-                IsActive = true,
-                CreatedDate = DateTime.UtcNow.AddMonths(-2),
-                UpdatedDate = DateTime.UtcNow
-            };
+            Variable modeloSimulado = new Variable(
+                    id: id,
+                    name: "Code",
+                    description: "Código alfanumérico estandarizado para identificar registros del sistema.",
+                    isActive: true,
+                    createdDate: DateTime.UtcNow.AddMonths(-2),
+                    updatedDate: DateTime.UtcNow,
+                    dataType: DataType.String,
+                    exampleValue: "DOC-2026-XYZ"
+                );
 
             return Ok(modeloSimulado);
         }

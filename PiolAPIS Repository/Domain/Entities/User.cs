@@ -15,14 +15,11 @@ namespace PiolAPIS_Repository.Domain.Entities
             Guid? id,
             string name, 
             string description,
-            char? type,
-            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string lastName,
             string role)
-            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateLastName(lastName);
             ValidateRole(role);

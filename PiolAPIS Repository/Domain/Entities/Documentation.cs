@@ -16,8 +16,6 @@
             Guid? id,
             string name,
             string description,
-            char? type,
-            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
@@ -25,7 +23,6 @@
             Guid configuracionDocumentacionId,
             Guid plantillaDtoId,
             string version)
-            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             if (proyectoId == Guid.Empty)
                 throw new ArgumentException("El ProyectoId proporcionado no es válido.");

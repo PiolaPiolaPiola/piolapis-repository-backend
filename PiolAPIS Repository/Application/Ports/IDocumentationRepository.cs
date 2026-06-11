@@ -4,10 +4,10 @@ namespace PiolAPIS_Repository.Application.Ports
 {
     public interface IDocumentationRepository
     {
-        void Save(Documentation documentation);
-        IList<Documentation> GetAll();
-        Documentation GetById(Guid id);
-        void Update(Documentation documentation);
-        void UpdateStatus(Guid id, bool status);
+        Task SaveAsync(Documentation documentation);
+        Task UpdateAsync(Documentation documentation);
+        Task<bool> ChangeStatusAsync(Guid id, bool isActive);
+        Task<Documentation?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Documentation>> GetAllAsync(Guid? proyectoId = null);
     }
 }

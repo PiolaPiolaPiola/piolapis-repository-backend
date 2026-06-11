@@ -18,8 +18,6 @@ namespace PiolAPIS_Repository.Domain.Entities
             Guid? id,
             string name,
             string description,
-            char? type,
-            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
@@ -29,7 +27,6 @@ namespace PiolAPIS_Repository.Domain.Entities
             char responseType,
             bool isShared,
             string? tags)
-            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateRequestType(requestType);
             ValidateResponseType(responseType);

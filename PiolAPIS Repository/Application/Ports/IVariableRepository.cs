@@ -4,10 +4,10 @@ namespace PiolAPIS_Repository.Application.Ports
 {
     public interface IVariableRepository
     {
-        void Save(Variable variable);
-        IList<Variable> GetAll();
-        Variable GetById(Guid id);
-        void Update(Variable variable);
-        void UpdateStatus(Guid id, bool status);
+        Task SaveAsync(Variable variable);
+        Task UpdateAsync(Variable variable);
+        Task<bool> ChangeStatusAsync(Guid id, bool isActive);
+        Task<Variable?> GetByIdAsync(Guid id);
+        Task<IEnumerable<Variable>> GetAllAsync();
     }
 }

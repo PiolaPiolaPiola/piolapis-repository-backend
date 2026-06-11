@@ -2,14 +2,14 @@
 {
     public abstract class Base 
     {
-        public Guid Id { get; private set; }
-        public string Name { get; private set; } = string.Empty;
-        public string Description { get; private set; } = string.Empty;
-        public char? Type { get; private set; }
-        public string Code { get; private set; } = string.Empty;
-        public bool IsActive { get; private set; }
-        public DateTime CreatedDate { get; private set; }
-        public DateTime? UpdatedDate { get; private set; }
+        public Guid? Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Description { get;  set; } = string.Empty;
+        public char? Type { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public bool IsActive { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
 
         protected Base() { }
 
