@@ -1,6 +1,7 @@
-﻿using PiolAPIS_Repository.Application.Ports;
+﻿using PiolAPIS_Repository.Application.Ports.Out;
 using PiolAPIS_Repository.Domain.Entities;
 using PiolAPIS_Repository.Infraestructure.Persistence;
+using PiolAPIS_Repository.Infraestructure.Persistence.Models;
 
 namespace PiolAPIS_Repository.Infraestructure.Adapters
 {
@@ -13,9 +14,18 @@ namespace PiolAPIS_Repository.Infraestructure.Adapters
             _context = context;
         }
 
-        public void Save(User user)
+        public void SaveAsync(User user)
         {
-
+            var dbModel = new UsersDbModel()
+            {
+                Id = user.Id,
+                Name = user.Name,
+                LastName = user.LastName,
+                Role = user.Role,
+                IsActive = user.IsActive,
+                CreatedDate = user.CreatedDate,
+                UpdatedDate = user.UpdatedDate
+            };
         }
     }
 }

@@ -1,6 +1,7 @@
-﻿using PiolAPIS_Repository.Domain.Entities;
+﻿using PiolAPIS_Repository.Application.Ports.Out;
+using PiolAPIS_Repository.Domain.Entities;
 
-namespace PiolAPIS_Repository.Application.Ports
+namespace PiolAPIS_Repository.Application.Ports.In
 {
     public class CreateUserUseCase
     {
