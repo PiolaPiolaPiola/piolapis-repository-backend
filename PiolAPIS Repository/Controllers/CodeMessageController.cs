@@ -1,83 +1,119 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PiolAPIS_Repository.Domain.Entities;
-using PiolAPIS_Repository.Domain.Entities.Enums;
+using PiolAPIS_Repository.Application.Ports.CodeMessage;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/mensajes-codigos")]
-    public class CodeMessageController : Controller
+    public class CodeMessageController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResult<CodeMessage>> Post([FromBody] CodeMessage modelo)
+        private readonly CreateCodeMessageUseCase _createUseCase;
+        private readonly GetCodeMessageByIdUseCase _getByIdUseCase;
+        private readonly ICodeMessageRepository _repository; 
+
+        public CodeMessageController(
+            CreateCodeMessageUseCase createUseCase,
+            GetCodeMessageByIdUseCase getByIdUseCase,
+            ICodeMessageRepository repository)
         {
-            if (modelo == null)
+            _createUseCase = createUseCase;
+            _getByIdUseCase = getByIdUseCase;
+            _repository = repository;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] CodeMessageDTOs.CreateCodeMessageRequest request)
+        {
+            if (request == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
 
-            modelo.Id ??= Guid.NewGuid();
-            modelo.CreatedDate = DateTime.UtcNow;
-            modelo.UpdatedDate = DateTime.UtcNow;
+            var nuevoCodigo = new CodeMessages(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                httpCode: request.HttpCode,
+                response: request.Response,
+                responseType: request.ResponseType
+            );
 
-            // TODO: Validar que el HTTP_code sea válido y guardar en la BD
-            // await _repository.InsertAsync(modelo);
+            await _createUseCase.Execute(nuevoCodigo);
 
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            return CreatedAtAction(nameof(GetById), new { id = nuevoCodigo.Id }, nuevoCodigo);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<CodeMessage>>> Get()
+        public async Task<ActionResult<IEnumerable<CodeMessages>>> Get()
         {
-            // TODO: Consultar el diccionario de respuestas parametrizadas de la BD de forma asíncrona
-            // var codigos = await _repository.GetAllAsync();
-
-            List<CodeMessage> listaSimulada = [];
-
-            return Ok(listaSimulada);
+            var codigos = await _repository.GetAllAsync();
+            return Ok(codigos);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<CodeMessage>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<CodeMessages>> GetById([FromRoute] Guid id)
         {
-            // TODO: Buscar el código parametrizado por su GUID
-            // var codigo = await _repository.GetByIdAsync(id);
-            // if (codigo == null) return NotFound($"No se encontró el código de mensaje con ID: {id}");
-
-            CodeMessage modeloSimulado = new CodeMessage(
-                id: id,
-                name: "ERR_USER_NOT_FOUND",
-                description: "Error global cuando un identificador de usuario no existe en el sistema.",
-                isActive: true,
-                createdDate: DateTime.UtcNow.AddMonths(-1),
-                updatedDate: DateTime.UtcNow,
-                httpCode: "404",
-                response: "{ \"code\": \"404\", \"message\": \"El recurso solicitado no fue hallado.\" }",
-                responseType: (char)DocumentationType.JSON
-            );
-
-            return Ok(modeloSimulado);
+            try
+            {
+                var codigo = await _getByIdUseCase.Execute(id);
+                return Ok(codigo);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] CodeMessage modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] CodeMessageDTOs.UpdateCodeMessageRequest request)
         {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID del modelo enviado.");
+            try
+            {
+                var codigoExistente = await _getByIdUseCase.Execute(id);
+                if (codigoExistente == null)
+                    return NotFound($"No se encontró el código de mensaje con ID: {id}");
 
-            // TODO: Mapear y actualizar las propiedades mutables (Description, Response, Response_type, HTTP_code)
-            modelo.UpdatedDate = DateTime.UtcNow;
+                codigoExistente.UpdateCodeMessage(
+                    request.Name,
+                    request.Description,
+                    request.HttpCode,
+                    request.Response,
+                    request.ResponseType
+                );
 
-            // var actualizado = await _repository.UpdateAsync(modelo);
-            // if (!actualizado) return NotFound();
+                await _repository.UpdateAsync(codigoExistente);
 
-            return NoContent(); 
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:guid}/estado")]
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] CodeMessageDTOs.ChangeCodeMessageStatusRequest request)
+        {
+            var modificado = await _repository.ChangeStatusAsync(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe el código con ID: {id}");
+
+            return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            // var eliminado = await _repository.DeletePhysicalAsync(id);
-            // if (!eliminado) return NotFound();
+            if (!await _repository.ValidateExistsAsync(id))
+                return NotFound($"No existe el código de mensaje con ID: {id}");
 
+            await _repository.Delete(id);
             return NoContent();
         }
     }

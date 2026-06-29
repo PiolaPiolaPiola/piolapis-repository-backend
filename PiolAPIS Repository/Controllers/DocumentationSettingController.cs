@@ -1,94 +1,127 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PiolAPIS_Repository.Domain.Entities;
-using PiolAPIS_Repository.Domain.Entities.Enums;
+using PiolAPIS_Repository.Application.Ports.DocumentationSetting;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/configuraciones-documentacion")]
-    public class DocumentationSettingController : Controller
+    public class DocumentationSettingController : ControllerBase
     {
-        public async Task<ActionResult<DocumentationSetting>> Post([FromBody] DocumentationSetting modelo)
+        private readonly CreateDocumentationSettingUseCase _createUseCase;
+        private readonly GetDocumentationSettingByIdUseCase _getByIdUseCase;
+        private readonly GetAllDocumentationSettingsUseCase _getAllUseCase;
+        private readonly UpdateDocumentationSettingUseCase _updateUseCase;
+        private readonly DeleteDocumentationSettingUseCase _deleteUseCase;
+        private readonly ChangeDocumentationSettingStatusUseCase _changeStatusUseCase;
+
+        public DocumentationSettingController(
+            CreateDocumentationSettingUseCase createUseCase,
+            GetDocumentationSettingByIdUseCase getByIdUseCase,
+            GetAllDocumentationSettingsUseCase getAllUseCase,
+            UpdateDocumentationSettingUseCase updateUseCase,
+            DeleteDocumentationSettingUseCase deleteUseCase,
+            ChangeDocumentationSettingStatusUseCase changeStatusUseCase)
         {
-            if (modelo == null)
+            _createUseCase = createUseCase;
+            _getByIdUseCase = getByIdUseCase;
+            _getAllUseCase = getAllUseCase;
+            _updateUseCase = updateUseCase;
+            _deleteUseCase = deleteUseCase;
+            _changeStatusUseCase = changeStatusUseCase;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] DocumentationSettingDTOs.CreateDocumentationSettingRequest request)
+        {
+            if (request == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
 
-            if (!modelo.Id.HasValue)
-            {
-                modelo.Id = Guid.NewGuid();
-            }
+            var nuevaConfiguracion = new DocumentationSettings(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                baseEndpoint: request.BaseEndpoint,
+                apiType: request.ApiType,
+                proyectoId: request.ProyectoId
+            );
 
-            // TODO: Guardar en la base de datos de manera asíncrona
-            // await _repository.InsertAsync(modelo);
+            await _createUseCase.Execute(nuevaConfiguracion);
 
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            return CreatedAtAction(nameof(GetById), new { id = nuevaConfiguracion.Id }, nuevaConfiguracion);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<DocumentationSetting>>> Get()
+        public async Task<ActionResult<IEnumerable<DocumentationSettings>>> Get()
         {
-            // TODO: Consultar masivamente usando LINQ
-            // var lista = await _repository.GetAllAsync();
-
-            List<DocumentationSetting> listaSimulada = [];
-
-            return Ok(listaSimulada);
+            var lista = await _getAllUseCase.Execute();
+            return Ok(lista);
         }
 
-        [HttpGet("{id}")] 
-        public async Task<ActionResult<DocumentationSetting>> GetById([FromRoute] Guid id)
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<DocumentationSettings>> GetById([FromRoute] Guid id)
         {
-            // TODO: Buscar por Id (string) en la BD
-            // var configuracion = await _repository.GetByIdAsync(id);
-            // if (configuracion == null) return NotFound($"No se encontró la configuración con ID: {id}");
-
-            DocumentationSetting modeloSimulado = new DocumentationSetting(
-                    id: id,
-                    name: "Configuración Estándar Enterprise",
-                    description: "Formato base para microservicios core",
-                    isActive: true,
-                    createdDate: DateTime.UtcNow.AddMonths(-1),
-                    updatedDate: DateTime.UtcNow,
-                    baseEndpoint: "https://api.enterprise.com/v1",
-                    apiType: (char)ApiType.REST, 
-                    proyectoId: Guid.NewGuid() 
-                );
-
-            return Ok(modeloSimulado);
+            try
+            {
+                var configuracion = await _getByIdUseCase.Execute(id);
+                return Ok(configuracion);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] DocumentationSetting modelo)
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] DocumentationSettingDTOs.UpdateDocumentationSettingRequest request)
         {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID del modelo enviado.");
+            try
+            {
+                var configExistente = await _getByIdUseCase.Execute(id);
+                if (configExistente == null)
+                    return NotFound($"No se encontró la configuración con ID: {id}");
 
-            // TODO: Actualizar la entidad completa en la base de datos
-            // var actualizado = await _repository.UpdateAsync(modelo);
-            // if (!actualizado) return NotFound();
+                configExistente.UpdateSetting(request.Name, request.Description, request.BaseEndpoint, request.ApiType);
+
+                await _updateUseCase.Execute(configExistente);
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:guid}/estado")]
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] DocumentationSettingDTOs.ChangeDocumentationSettingStatusRequest request)
+        {
+            var modificado = await _changeStatusUseCase.Execute(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe la configuración con ID: {id}");
 
             return NoContent();
         }
 
-        [HttpPatch("{id}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] DocumentationSetting modeloEstado)
-        {
-            // TODO: Recuperar entidad de la BD, actualizar solo el campo de estado y guardar cambios
-            // var modificado = await _repository.CambiarEstadoAsync(id, modeloEstado.Type);
-            // if (!modificado) return NotFound();
-            modeloEstado.UpdatedDate = DateTime.UtcNow;
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            // TODO: Lógica para validar relaciones en BD y proceder con Hard Delete o cascada
-            // var eliminado = await _repository.DeletePhysicalAsync(id);
-            // if (!eliminado) return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _deleteUseCase.Execute(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

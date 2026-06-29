@@ -1,83 +1,112 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Application.Ports.Documentation;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/documentaciones")]
-    public class DocumentationController : Controller
+    public class DocumentationController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResult<Documentation>> Post([FromBody] Documentation modelo)
+        private readonly CreateDocumentationUseCase _createDocumentationUseCase;
+        private readonly GetDocumentationByIdUseCase _getDocumentationByIdUseCase;
+        private readonly GetAllDocumentationsUseCase _getAllDocumentationsUseCase;
+        private readonly UpdateDocumentationUseCase _updateDocumentationUseCase;
+        private readonly DeleteDocumentationUseCase _deleteDocumentationUseCase;
+        private readonly ChangeDocumentationStatusUseCase _changeDocumentationStatusUseCase;
+
+        public DocumentationController(
+            CreateDocumentationUseCase createDocumentationUseCase,
+            GetDocumentationByIdUseCase getDocumentationByIdUseCase,
+            GetAllDocumentationsUseCase getAllDocumentationsUseCase,
+            UpdateDocumentationUseCase updateDocumentationUseCase,
+            DeleteDocumentationUseCase deleteDocumentationUseCase,
+            ChangeDocumentationStatusUseCase changeDocumentationStatusUseCase)
         {
-            if (modelo == null)
+            _createDocumentationUseCase = createDocumentationUseCase;
+            _getDocumentationByIdUseCase = getDocumentationByIdUseCase;
+            _getAllDocumentationsUseCase = getAllDocumentationsUseCase;
+            _updateDocumentationUseCase = updateDocumentationUseCase;
+            _deleteDocumentationUseCase = deleteDocumentationUseCase;
+            _changeDocumentationStatusUseCase = changeDocumentationStatusUseCase;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] DocumentationDTOs.CreateDocumentationRequest request)
+        {
+            if (request == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
 
-            modelo.Id ??= Guid.NewGuid();
-            modelo.IsActive = true;
-            modelo.CreatedDate = DateTime.UtcNow;
-            modelo.UpdatedDate = DateTime.UtcNow;
+            var nuevaDocumentacion = new Documentations(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                proyectoId: request.ProyectoId,
+                configuracionDocumentacionId: request.ConfiguracionDocumentacionId,
+                plantillaDtoId: request.PlantillaDtoId,
+                version: request.Version
+            );
 
-            // TODO: Validar que existan previamente el ProyectoId, ConfiguracionId y PlantillaId en BD
-            // await _repository.InsertAsync(modelo);
+            await _createDocumentationUseCase.Execute(nuevaDocumentacion);
 
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            return CreatedAtAction(nameof(GetById), new { id = nuevaDocumentacion.Id }, nuevaDocumentacion);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Documentation>>> Get([FromQuery] Guid? proyectoId)
+        public async Task<ActionResult<IEnumerable<Documentations>>> Get([FromQuery] Guid? proyectoId)
         {
-            // TODO: Implementar búsqueda con LINQ eficiente
-            // IQueryable<Documentacion> query = _repository.AsQueryable();
-            // if (proyectoId.HasValue) query = query.Where(d => d.ProyectoId == proyectoId.Value);
-            // var lista = await query.ToListAsync();
-
-            List<Documentation> listaSimulada = [];
-
-            return Ok(listaSimulada);
+            var documentaciones = await _getAllDocumentationsUseCase.Execute(proyectoId);
+            return Ok(documentaciones);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Documentation>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Documentations>> GetById([FromRoute] Guid id)
         {
-            // var documentacion = await _repository.GetByIdCompleteAsync(id);
-            // if (documentacion == null) return NotFound($"No existe documentación con el ID: {id}");
-
-            Documentation modeloSimulado = new Documentation(
-                    id: id,
-                    name: "V1/Checkout/Process-Payment",
-                    description: "Documentación del contrato base para la integración con pasarelas de pago.",
-                    isActive: true,
-                    createdDate: DateTime.UtcNow.AddMonths(-1),
-                    updatedDate: DateTime.UtcNow,
-                    proyectoId: Guid.NewGuid(), 
-                    configuracionDocumentacionId: Guid.NewGuid(),
-                    plantillaDtoId: Guid.NewGuid(),
-                    version: "1.0.4"
-                );
-
-            return Ok(modeloSimulado);
+            try
+            {
+                var documentation = await _getDocumentationByIdUseCase.Execute(id);
+                return Ok(documentation);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Documentation modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] DocumentationDTOs.UpdateDocumentationRequest request)
         {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID del cuerpo de la petición.");
+            try
+            {
+                var docExistente = await _getDocumentationByIdUseCase.Execute(id);
+                if (docExistente == null)
+                    return NotFound($"No existe documentación con el ID: {id}");
 
-            modelo.UpdatedDate = DateTime.UtcNow;
+                docExistente.UpdateDocumentation(request.Name, request.Description, request.Version, request.PlantillaDtoId);
 
-            // var actualizado = await _repository.UpdateAsync(modelo);
-            // if (!actualizado) return NotFound();
+                await _updateDocumentationUseCase.Execute(docExistente);
 
-            return NoContent(); 
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPatch("{id:guid}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] Documentation modeloEstado)
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] DocumentationDTOs.ChangeDocumentationStatusRequest request)
         {
-            // var modificado = await _repository.CambiarStatusAsync(id, modeloEstado.Status);
-            // if (!modificado) return NotFound();
+            var modificado = await _changeDocumentationStatusUseCase.Execute(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe la documentación con ID: {id}");
 
             return NoContent();
         }
@@ -85,11 +114,15 @@ namespace PiolAPIS_Repository.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            // TODO: Eliminar físicamente el registro de la tabla
-            // var eliminado = await _repository.DeletePhysicalAsync(id);
-            // if (!eliminado) return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _deleteDocumentationUseCase.Execute(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

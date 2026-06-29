@@ -1,25 +1,28 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
 
 namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class DocumentationSetting : Base
+    public class DocumentationSettings : Base
     {
         public string BaseEndpoint { get; private set; } = string.Empty;
-        public char ApiType { get; private set; } 
+        public char ApiType { get; private set; }
         public Guid ProyectoId { get; private set; }
 
-        protected DocumentationSetting() : base() { }
+        protected DocumentationSettings() : base() { }
 
-        public DocumentationSetting(
+        public DocumentationSettings(
             Guid? id,
             string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string baseEndpoint,
             char apiType,
             Guid proyectoId)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             if (proyectoId == Guid.Empty)
                 throw new ArgumentException("El ProyectoId debe ser válido.");
@@ -32,8 +35,9 @@ namespace PiolAPIS_Repository.Domain.Entities
             ProyectoId = proyectoId;
         }
 
-        public void UpdateEndpointConfiguration(string newBaseEndpoint, char newApiType)
+        public void UpdateSetting(string newName, string newDescription, string newBaseEndpoint, char newApiType)
         {
+            UpdateMetadata(newName, newDescription, this.Code);
             ValidateBaseEndpoint(newBaseEndpoint);
             ValidateApiType(newApiType);
 
@@ -52,7 +56,11 @@ namespace PiolAPIS_Repository.Domain.Entities
 
         private static void ValidateApiType(char apiType)
         {
-
+            char upperType = char.ToUpperInvariant(apiType);
+            if (upperType != 'R' && upperType != 'G' && upperType != 'S')
+            {
+                throw new ArgumentException($"El tipo de API '{apiType}' no es válido. Use valores estándar reconocidos.");
+            }
         }
     }
 }

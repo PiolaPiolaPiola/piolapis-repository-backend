@@ -1,21 +1,22 @@
-﻿namespace PiolAPIS_Repository.Domain.Entities
+﻿using System;
+
+namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class Documentation : Base
+    public class Documentations : Base
     {
         public Guid ProyectoId { get; private set; }
         public Guid ConfiguracionDocumentacionId { get; private set; }
         public Guid PlantillaDtoId { get; private set; }
-
         public string Version { get; private set; } = "1.0.0";
 
-        protected Documentation() : base() { }
+        protected Documentations() : base() { }
 
-        public Tuple<Guid, Guid, Guid> GetRelations() => Tuple.Create(ProyectoId, ConfiguracionDocumentacionId, PlantillaDtoId);
-
-        public Documentation(
+        public Documentations(
             Guid? id,
             string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
@@ -23,6 +24,7 @@
             Guid configuracionDocumentacionId,
             Guid plantillaDtoId,
             string version)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             if (proyectoId == Guid.Empty)
                 throw new ArgumentException("El ProyectoId proporcionado no es válido.");
@@ -39,6 +41,13 @@
             ConfiguracionDocumentacionId = configuracionDocumentacionId;
             PlantillaDtoId = plantillaDtoId;
             Version = string.IsNullOrWhiteSpace(version) ? "1.0.0" : version.Trim();
+        }
+
+        public void UpdateDocumentation(string newName, string newLastName, string newVersion, Guid newPlantillaDtoId)
+        {
+            UpdateMetadata(newName, newLastName, this.Code);
+            UpdateVersion(newVersion);
+            ChangePlantilla(newPlantillaDtoId);
         }
 
         public void UpdateVersion(string newVersion)
@@ -58,7 +67,9 @@
         private static void ValidateVersion(string version)
         {
             if (string.IsNullOrWhiteSpace(version))
-                throw new ArgumentException("El campo de versión es obligatorios.");
+                throw new ArgumentException("El campo de versión es obligatorio.");
         }
+
+        public Tuple<Guid, Guid, Guid> GetRelations() => Tuple.Create(ProyectoId, ConfiguracionDocumentacionId, PlantillaDtoId);
     }
 }

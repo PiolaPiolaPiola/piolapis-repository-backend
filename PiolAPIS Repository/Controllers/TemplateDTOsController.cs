@@ -9,7 +9,7 @@ namespace PiolAPIS_Repository.Controllers
     public class TemplateDTOsController : Controller
     {
         [HttpPost]
-        public async Task<ActionResult<TemplateDTOs>> Post([FromBody] TemplateDTOs modelo)
+        public async Task<ActionResult<TemplatesDTOs>> Post([FromBody] TemplatesDTOs modelo)
         {
             if (modelo == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
@@ -25,7 +25,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TemplateDTOs>>> Get([FromQuery] char? language, [FromQuery] string? tag)
+        public async Task<ActionResult<IEnumerable<TemplatesDTOs>>> Get([FromQuery] char? language, [FromQuery] string? tag)
         {
             // TODO: Implementar búsqueda con LINQ eficiente usando los nuevos campos
             // IQueryable<PlantillasDTOs> query = _repository.AsQueryable().Where(p => p.IsShared);
@@ -33,19 +33,19 @@ namespace PiolAPIS_Repository.Controllers
             // if (!string.IsNullOrEmpty(tag)) query = query.Where(p => p.Tags.Contains(tag));
             // var lista = await query.ToListAsync();
 
-            List<TemplateDTOs> listaSimulada = [];
+            List<TemplatesDTOs> listaSimulada = [];
 
             return Ok(listaSimulada);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<TemplateDTOs>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<TemplatesDTOs>> GetById([FromRoute] Guid id)
         {
             // TODO: Buscar plantilla en base de datos por ID
             // var plantilla = await _repository.GetByIdAsync(id);
             // if (plantilla == null) return NotFound($"No se encontró la plantilla con ID: {id}");
 
-            TemplateDTOs modeloSimulado = new TemplateDTOs(
+            TemplatesDTOs modeloSimulado = new TemplatesDTOs(
                     id: id,
                     name: "PagedResponseDTO",
                     description: "Estructura estándar global para respuestas paginadas en la organización.",
@@ -64,7 +64,7 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] TemplateDTOs modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] TemplatesDTOs modelo)
         {
             if (id != modelo.Id)
                 return BadRequest("El ID de la ruta no coincide con el ID de la plantilla provista.");
@@ -86,33 +86,33 @@ namespace PiolAPIS_Repository.Controllers
             return NoContent();
         }
 
-        [HttpPost("importar-estructura")]
-        [Consumes("multipart/form-data")]
-        public async Task<ActionResult<TemplateDTOs>> ImportarEstructura([FromForm] TemplateDTOs modelo)
-        {
-            if (modelo.File == null || modelo.File.Length == 0)
-                return BadRequest("Se debe adjuntar un archivo válido para extraer la estructura.");
+        //[HttpPost("importar-estructura")]
+        //[Consumes("multipart/form-data")]
+        //public async Task<ActionResult<TemplatesDTOs>> ImportarEstructura([FromForm] TemplatesDTOs modelo)
+        //{
+        //    if (modelo.File == null || modelo.File.Length == 0)
+        //        return BadRequest("Se debe adjuntar un archivo válido para extraer la estructura.");
 
-            try
-            {
-                using var stream = modelo.File.OpenReadStream();
-                using var reader = new StreamReader(stream);
-                string contenidoArchivo = await reader.ReadToEndAsync();
+        //    try
+        //    {
+        //        using var stream = modelo.File.OpenReadStream();
+        //        using var reader = new StreamReader(stream);
+        //        string contenidoArchivo = await reader.ReadToEndAsync();
 
-                // var contratoExtraido = _contractParser.Parse(contenidoArchivo);
+        //        // var contratoExtraido = _contractParser.Parse(contenidoArchivo);
 
-                modelo.RequestType = (char)RequestType.POST;
-                modelo.Request = "{ \"id\": 0, \"nombre\": \"string\" }"; // Extraído del archivo
-                modelo.Response = "{ \"status\": \"success\", \"data\": { \"id\": 123 } }"; // Extraído del archivo
-                modelo.ResponseType = (char)DocumentationType.JSON;
-                modelo.Name = Path.GetFileNameWithoutExtension(modelo.File.FileName);
+        //        modelo.RequestType = (char)RequestType.POST;
+        //        modelo.Request = "{ \"id\": 0, \"nombre\": \"string\" }"; // Extraído del archivo
+        //        modelo.Response = "{ \"status\": \"success\", \"data\": { \"id\": 123 } }"; // Extraído del archivo
+        //        modelo.ResponseType = (char)DocumentationType.JSON;
+        //        modelo.Name = Path.GetFileNameWithoutExtension(modelo.File.FileName);
 
-                return Ok(modelo);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Error al leer el contrato de la API: {ex.Message}");
-            }
-        }
+        //        return Ok(modelo);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(StatusCodes.Status500InternalServerError, $"Error al leer el contrato de la API: {ex.Message}");
+        //    }
+        //}
     }
 }

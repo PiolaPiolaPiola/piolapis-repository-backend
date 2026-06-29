@@ -1,23 +1,28 @@
-﻿namespace PiolAPIS_Repository.Domain.Entities
+﻿using System;
+
+namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class CodeMessage : Base
+    public class CodeMessages : Base
     {
         public string HttpCode { get; private set; } = string.Empty;
         public string Response { get; private set; } = string.Empty;
         public char ResponseType { get; private set; }
 
-        protected CodeMessage() : base() { }
+        protected CodeMessages() : base() { }
 
-        public CodeMessage(
+        public CodeMessages(
             Guid? id,
             string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string httpCode,
             string response,
             char responseType)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateHttpCode(httpCode);
             ValidateResponse(response);
@@ -27,15 +32,15 @@
             ResponseType = responseType;
         }
 
-        public void UpdateContract(string httpCode, string response, char responseType)
+        public void UpdateCodeMessage(string newName, string newDescription, string httpCode, string response, char responseType)
         {
+            UpdateMetadata(newName, newDescription, this.Code);
             ValidateHttpCode(httpCode);
             ValidateResponse(response);
 
             HttpCode = httpCode.Trim();
             Response = response.Trim();
             ResponseType = responseType;
-
         }
 
         private static void ValidateHttpCode(string httpCode)

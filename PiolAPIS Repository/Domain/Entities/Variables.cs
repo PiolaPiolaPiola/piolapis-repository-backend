@@ -1,21 +1,26 @@
-﻿namespace PiolAPIS_Repository.Domain.Entities
+﻿using System;
+
+namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class Variable : Base
+    public class Variables : Base
     {
         public string DataType { get; private set; } = string.Empty;
         public string? ExampleValue { get; private set; }
 
-        protected Variable() : base() { }
+        protected Variables() : base() { }
 
-        public Variable(
+        public Variables(
             Guid? id,
             string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string dataType,
             string? exampleValue)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateDataType(dataType);
 
@@ -23,10 +28,9 @@
             ExampleValue = exampleValue?.Trim();
         }
 
-        public void UpdateConfiguration(string newDataType, string? newExampleValue, string newDescription)
+        public void UpdateVariable(string newDataType, string? newExampleValue, string newDescription)
         {
             ValidateDataType(newDataType);
-
             UpdateMetadata(this.Name, newDescription, this.Code);
 
             DataType = newDataType.Trim();
@@ -40,13 +44,13 @@
 
             string cleanedType = dataType.Trim();
 
-            bool esValido = cleanedType == Entities.Enums.DataType.String ||
-                            cleanedType == Entities.Enums.DataType.Int ||
-                            cleanedType == Entities.Enums.DataType.Bool;
+            bool esValido = cleanedType == Enums.DataType.String ||
+                            cleanedType == Enums.DataType.Int ||
+                            cleanedType == Enums.DataType.Bool;
 
             if (!esValido)
             {
-                throw new ArgumentException($"El tipo de dato '{dataType}' no está permitido. Debe ser {Entities.Enums.DataType.String}, {Entities.Enums.DataType.Int} o {Entities.Enums.DataType.Bool}.");
+                throw new ArgumentException($"El tipo de dato '{dataType}' no está permitido. Debe ser {Enums.DataType.String}, {Enums.DataType.Int} o {Enums.DataType.Bool}.");
             }
         }
     }

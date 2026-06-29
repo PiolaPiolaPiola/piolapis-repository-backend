@@ -1,83 +1,125 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PiolAPIS_Repository.Domain.Entities;
+using PiolAPIS_Repository.Application.Ports.Project;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
-    public class ProjectController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ProjectController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResult<Project>> Post([FromBody] Project modelo)
+        private readonly CreateProjectUseCase _createProjectUseCase;
+        private readonly GetProjectByIdUseCase _getProjectByIdUseCase;
+        private readonly GetAllProjectsUseCase _getAllProjectsUseCase;
+        private readonly UpdateProjectUseCase _updateProjectUseCase;
+        private readonly DeleteProjectUseCase _deleteProjectUseCase;
+
+        private readonly IProjectRepository _projectRepository;
+
+        public ProjectController(
+            CreateProjectUseCase createProjectUseCase,
+            GetProjectByIdUseCase getProjectByIdUseCase,
+            GetAllProjectsUseCase getAllProjectsUseCase,
+            UpdateProjectUseCase updateProjectUseCase,
+            DeleteProjectUseCase deleteProjectUseCase,
+            IProjectRepository projectRepository)
         {
-            if (modelo == null)
+            _createProjectUseCase = createProjectUseCase;
+            _getProjectByIdUseCase = getProjectByIdUseCase;
+            _getAllProjectsUseCase = getAllProjectsUseCase;
+            _updateProjectUseCase = updateProjectUseCase;
+            _deleteProjectUseCase = deleteProjectUseCase;
+            _projectRepository = projectRepository;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] ProjectDTOs.CreateProjectRequest request)
+        {
+            if (request == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
 
-            modelo.Id ??= Guid.NewGuid();
-            modelo.CreatedDate = DateTime.UtcNow;
-            modelo.UpdatedDate = DateTime.UtcNow;
+            var nuevoProyecto = new Projects(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null
+            );
 
-            // TODO: Guardar en la BD
-            // await _proyectoRepository.InsertAsync(modelo);
+            var resultado = await _createProjectUseCase.Execute(nuevoProyecto);
 
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            return CreatedAtAction(nameof(GetById), new { id = resultado.Id }, resultado);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Project>>> Get()
+        public async Task<ActionResult<IEnumerable<Projects>>> Get()
         {
-            // TODO: Consultar proyectos que no estén eliminados lógicamente
-            // var proyectos = await _proyectoRepository.GetActivosAsync();
-
-            List<Project> listaSimulada = [];
-
-            return Ok(listaSimulada);
+            var proyectos = await _getAllProjectsUseCase.Execute();
+            return Ok(proyectos);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Project>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Projects>> GetById([FromRoute] Guid id)
         {
-            // TODO: Buscar el proyecto por su ID e incluir el árbol de APIs vinculadas (.Include(p => p.Apis) con EF Core)
-            // var proyecto = await _proyectoRepository.GetByIdWithApisAsync(id);
-            // if (proyecto == null) return NotFound($"No se encontró el proyecto con ID: {id}");
-
-            Project modeloSimulado = new Project(
-                    id: id,
-                    name: "Proyecto Core E-Commerce",
-                    description: "Contenedor principal para las APIs de Checkout, Catálogo y Pagos.",
-                    isActive: true,
-                    createdDate: DateTime.UtcNow.AddDays(-10),
-                    updatedDate: DateTime.UtcNow
-                );
-
-            return Ok(modeloSimulado);
+            try
+            {
+                var proyecto = await _getProjectByIdUseCase.Execute(id);
+                return Ok(proyecto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Project modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] ProjectDTOs.UpdateProjectRequest request)
         {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID del proyecto enviado.");
+            try
+            {
+                var proyectoExistente = await _getProjectByIdUseCase.Execute(id);
+                if (proyectoExistente == null)
+                    return NotFound($"No se encontró el proyecto con ID: {id}");
 
-            // TODO: Recuperar entidad actual, mapear Name, Description, Code y actualizar fecha
-            modelo.UpdatedDate = DateTime.UtcNow;
+                proyectoExistente.UpdateProject(request.Name, request.Description);
 
-            // var actualizado = await _proyectoRepository.UpdateAsync(modelo);
-            // if (!actualizado) return NotFound();
+                await _updateProjectUseCase.Execute(proyectoExistente);
 
-            return NoContent(); 
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPatch("{id:guid}/status")]
+        public async Task<IActionResult> PatchStatus([FromRoute] Guid id, [FromBody] ProjectDTOs.ChangeProjectStatusRequest request)
+        {
+            var modificado = await _projectRepository.ChangeStatusAsync(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe el proyecto con ID: {id}");
+
+            return NoContent();
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            // TODO: Implementar Soft Delete (Borrado Lógico) en el repositorio
-            // Al ser borrado lógico, no hacemos un 'Remove' físico. 
-            // Cambiamos un flag (ej. IsDeleted = true) y actualizamos la propiedad 'UpdatedDate'.
-
-            // var borradoExitoso = await _proyectoRepository.SoftDeleteAsync(id);
-            // if (!borradoExitoso) return NotFound();
-
-            return NoContent(); // Se retorna 204 NoContent indicando que el recurso se procesó correctamente
+            try
+            {
+                await _deleteProjectUseCase.Execute(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

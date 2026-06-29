@@ -1,85 +1,110 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using PiolAPIS_Repository.Domain.Entities;
-using PiolAPIS_Repository.Domain.Entities.Enums;
+using PiolAPIS_Repository.Application.Ports.Variable;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
     [Route("api/v1/variables")]
-    public class VariablesController : Controller
+    public class VariablesController : ControllerBase
     {
-        [HttpPost]
-        public async Task<ActionResult<Variable>> Post([FromBody] Variable modelo)
+        private readonly CreateVariableUseCase _createVariableUseCase;
+        private readonly GetVariableByIdUseCase _getVariableByIdUseCase;
+        private readonly GetAllVariablesUseCase _getAllVariablesUseCase;
+        private readonly UpdateVariableUseCase _updateVariableUseCase;
+        private readonly DeleteVariableUseCase _deleteVariableUseCase;
+        private readonly ChangeVariableStatusUseCase _changeVariableStatusUseCase;
+
+        public VariablesController(
+            CreateVariableUseCase createVariableUseCase,
+            GetVariableByIdUseCase getVariableByIdUseCase,
+            GetAllVariablesUseCase getAllVariablesUseCase,
+            UpdateVariableUseCase updateVariableUseCase,
+            DeleteVariableUseCase deleteVariableUseCase,
+            ChangeVariableStatusUseCase changeVariableStatusUseCase)
         {
-            if (modelo == null)
+            _createVariableUseCase = createVariableUseCase;
+            _getVariableByIdUseCase = getVariableByIdUseCase;
+            _getAllVariablesUseCase = getAllVariablesUseCase;
+            _updateVariableUseCase = updateVariableUseCase;
+            _deleteVariableUseCase = deleteVariableUseCase;
+            _changeVariableStatusUseCase = changeVariableStatusUseCase;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] VariableDTOs.CreateVariableRequest request)
+        {
+            if (request == null)
                 return BadRequest("El cuerpo de la petición no puede ser nulo.");
 
-            if (string.IsNullOrWhiteSpace(modelo.Name))
-                return BadRequest("El nombre de la variable es obligatorio.");
+            var nuevaVariable = new Variables(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                dataType: request.DataType,
+                exampleValue: request.ExampleValue
+            );
 
-            modelo.Id ??= Guid.NewGuid();
-            modelo.IsActive = true; // Por defecto nace activa
-            modelo.CreatedDate = DateTime.UtcNow;
-            modelo.UpdatedDate = DateTime.UtcNow;
+            await _createVariableUseCase.Execute(nuevaVariable);
 
-            // TODO: Persistir en la base de datos de forma asíncrona
-            // await _repository.InsertAsync(modelo);
-
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            return CreatedAtAction(nameof(GetById), new { id = nuevaVariable.Id }, nuevaVariable);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Variable>>> Get([FromQuery] bool? soloActivas)
+        public async Task<ActionResult<IEnumerable<Variables>>> Get()
         {
-            // TODO: Consultar base de datos aplicando filtros con LINQ expresiones
-            // IQueryable<Variable> query = _repository.AsQueryable();
-            // if (soloActivas.HasValue) query = query.Where(v => v.IsActive == soloActivas.Value);
-            // var variables = await query.ToListAsync();
-
-            List<Variable> listaSimulada = [];
-
-            return Ok(listaSimulada);
+            var variables = await _getAllVariablesUseCase.Execute();
+            return Ok(variables);
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<Variable>> GetById([FromRoute] Guid id)
+        public async Task<ActionResult<Variables>> GetById([FromRoute] Guid id)
         {
-            // var variable = await _repository.GetByIdAsync(id);
-            // if (variable == null) return NotFound($"No se encontró la variable con ID: {id}");
-
-            Variable modeloSimulado = new Variable(
-                    id: id,
-                    name: "Code",
-                    description: "Código alfanumérico estandarizado para identificar registros del sistema.",
-                    isActive: true,
-                    createdDate: DateTime.UtcNow.AddMonths(-2),
-                    updatedDate: DateTime.UtcNow,
-                    dataType: DataType.String,
-                    exampleValue: "DOC-2026-XYZ"
-                );
-
-            return Ok(modeloSimulado);
+            try
+            {
+                var variable = await _getVariableByIdUseCase.Execute(id);
+                return Ok(variable);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] Variable modelo)
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] VariableDTOs.UpdateVariableRequest request)
         {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID de la variable provista.");
+            try
+            {
+                var variableExistente = await _getVariableByIdUseCase.Execute(id);
+                if (variableExistente == null)
+                    return NotFound($"No se encontró la variable con ID: {id}");
 
-            // TODO: Actualizar la estructura completa en la base de datos
-            modelo.UpdatedDate = DateTime.UtcNow;
-            // var actualizado = await _repository.UpdateAsync(modelo);
-            // if (!actualizado) return NotFound();
+                variableExistente.UpdateVariable(request.DataType, request.ExampleValue, request.Description);
 
-            return NoContent(); // 204 No Content para mutaciones completas exitosas
+                await _updateVariableUseCase.Execute(variableExistente);
+
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPatch("{id:guid}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] Variable modeloEstado)
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] VariableDTOs.ChangeVariableStatusRequest request)
         {
-            // var modificado = await _repository.CambiarEstadoAsync(id, modeloEstado.IsActive);
-            // if (!modificado) return NotFound();
+            var modificado = await _changeVariableStatusUseCase.Execute(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe la variable con ID: {id}");
 
             return NoContent();
         }
@@ -87,10 +112,15 @@ namespace PiolAPIS_Repository.Controllers
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
-            // var eliminado = await _repository.DeletePhysicalIfUnusedAsync(id);
-            // if (!eliminado) return NotFound();
-
-            return NoContent();
+            try
+            {
+                await _deleteVariableUseCase.Execute(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
     }
 }

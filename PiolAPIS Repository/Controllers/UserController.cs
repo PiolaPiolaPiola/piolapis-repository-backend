@@ -1,106 +1,111 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using PiolAPIS_Repository.Application.Ports.User;
 using PiolAPIS_Repository.Domain.Entities;
-using System.Reflection;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
-    [Route("api/v1/usuarios")]
-    public class UserController : Controller
+    [Route("api/[controller]")]
+    public class UserController : ControllerBase
     {
-        [HttpPost("registro")]
-        public async Task<ActionResult<User>> Post([FromBody] User modelo)
+        private readonly CreateUserUseCase _createUserUseCase;
+        private readonly GetUserByIdUseCase _getUserByIdUseCase;
+        private readonly GetAllUsersByRoleUseCase _getAllUsersByRoleUseCase;
+        private readonly UpdateUserUseCase _updateUserUseCase;
+        private readonly DeleteUserUseCase _deleteUserUseCase;
+        private readonly ChangeUserStatusUseCase _changeUserStatusUseCase;
+        private readonly IUserRepository _userRepository; 
+
+        public UserController(
+            CreateUserUseCase createUserUseCase,
+            GetUserByIdUseCase getUserByIdUseCase,
+            GetAllUsersByRoleUseCase getAllUsersByRoleUseCase,
+            UpdateUserUseCase updateUserUseCase,
+            DeleteUserUseCase deleteUserUseCase,
+            ChangeUserStatusUseCase changeUserStatusUseCase,
+            IUserRepository userRepository)
         {
-            if (modelo == null)
-                return BadRequest("Se debe enviar un cuerpo en la petición");
-
-            modelo.Id = Guid.NewGuid();
-            modelo.CreatedDate = DateTime.UtcNow;
-            modelo.UpdatedDate = DateTime.UtcNow;
-
-            // TODO: Encriptar contraseña y guardar en la base de datos
-
-            return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
+            _createUserUseCase = createUserUseCase;
+            _getUserByIdUseCase = getUserByIdUseCase;
+            _getAllUsersByRoleUseCase = getAllUsersByRoleUseCase;
+            _updateUserUseCase = updateUserUseCase;
+            _deleteUserUseCase = deleteUserUseCase;
+            _changeUserStatusUseCase = changeUserStatusUseCase;
+            _userRepository = userRepository;
         }
 
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] User modelo)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] UserDTOs.CreateUserRequest request)
         {
-            // TODO: Validar credenciales contra la BD y generar el JWT Token.
-            // var token = await _authService.GenerateTokenAsync(modelo);
+            if (request == null)
+                return BadRequest("El cuerpo de la petición no puede estar vacío");
 
-            return Ok(new { token = "Token-JWT-Simulado-XYZ..." });
+            var nuevoUsuario = new Users(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                lastName: request.LastName,
+                role: request.Role
+            );
+
+            await _createUserUseCase.Execute(nuevoUsuario);
+
+            return CreatedAtAction(nameof(GetById), new { id = nuevoUsuario.Id }, nuevoUsuario);
         }
 
-        [HttpPost("logout")]
-        public async Task<IActionResult> Logout()
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<Users>> GetById([FromRoute] Guid id)
         {
-            // TODO: Invalidar el token JWT actual (por ejemplo, añadiéndolo a una lista negra en Redis)
+            try
+            {
+                var usuario = await _getUserByIdUseCase.Execute(id);
+                return Ok(usuario);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] UserDTOs.UpdateUserRequest request)
+        {
+            var usuarioExistente = await _getUserByIdUseCase.Execute(id);
+            if (usuarioExistente == null)
+                return NotFound($"No se encontró el usuario con ID: {id}");
+
+            usuarioExistente.UpdateProfile(request.Name, request.LastName, request.Description);
+
+            await _updateUserUseCase.Execute(usuarioExistente);
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id:guid}/status")]
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] UserDTOs.ChangeStatusRequest request)
+        {
+            var modificado = await _changeUserStatusUseCase.Execute(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe el usuario con ID: {id}");
+
             return NoContent();
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> Get([FromQuery] string? rol)
+        public async Task<ActionResult<IEnumerable<Users>>> Get([FromQuery] string rol)
         {
-            List<User> usuariosSimulados = [];
+            if (string.IsNullOrWhiteSpace(rol))
+                return BadRequest("El parámetro 'rol' es obligatorio para la búsqueda.");
 
-            return Ok(usuariosSimulados);
-        }
-
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<User>> GetById([FromRoute] Guid id)
-        {
-            // TODO: Buscar el usuario por su GUID en la BD
-            // var usuario = await _userRepository.GetByIdAsync(id);
-            // if (usuario == null) return NotFound();
-
-            User usuarioSimulado = new User(
-                    id: id,
-                    name: "Usuario",
-                    description: "Usuario administrador inicial del sistema de catálogo.", 
-                    isActive: true,
-                    createdDate: DateTime.UtcNow.AddMonths(-3),
-                    updatedDate: DateTime.UtcNow,
-                    lastName: "Prueba",
-                    role: "Admin"
-                );
-
-            return Ok(usuarioSimulado);
-        }
-
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] User modelo)
-        {
-            if (id != modelo.Id)
-                return BadRequest("El ID de la ruta no coincide con el ID del modelo enviado.");
-
-            // TODO: Obtener entidad de la BD, mapear los cambios permitidos y actualizar
-            modelo.UpdatedDate = DateTime.UtcNow;
-            // await _userRepository.UpdateAsync(modelo);
-
-            return NoContent();
-        }
-
-        [HttpPatch("{id:guid}/estado")]
-        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] User modeloEstado)
-        {
-            modeloEstado.UpdatedDate = DateTime.UtcNow;
-            // TODO: Implementar borrado lógico (e.g., Update de columna IsActive / Estado)
-            // var modificado = await _userRepository.InactivarUsuarioAsync(id, modeloEstado.Role /* o una prop de estado */);
-            // if (!modificado) return NotFound();
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id:guid}")]
-        public async Task<IActionResult> Delete([FromRoute] Guid id)
-        {
-            // TODO: Eliminación física (Hard Delete) de la base de datos
-            // var eliminado = await _userRepository.DeletePhysicalAsync(id);
-            // if (!eliminado) return NotFound();
-
-            return NoContent();
+            var usuarios = await _getAllUsersByRoleUseCase.Execute(rol);
+            return Ok(usuarios);
         }
     }
 }

@@ -1,25 +1,26 @@
-﻿using System;
-
-namespace PiolAPIS_Repository.Domain.Entities
+﻿namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class User : Base
+    public class Users : Base
     {
         public string LastName { get; private set; } = string.Empty;
-        public string Role { get; private set; } = string.Empty; 
+        public string Role { get; private set; } = string.Empty;
 
         public string FullName => $"{Name} {LastName}".Trim();
 
-        protected User() : base() { }
+        protected Users() : base() { }
 
-        public User(
+        public Users(
             Guid? id,
-            string name, 
+            string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
             string lastName,
             string role)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateLastName(lastName);
             ValidateRole(role);
@@ -31,9 +32,7 @@ namespace PiolAPIS_Repository.Domain.Entities
         public void UpdateProfile(string newName, string newLastName, string newDescription)
         {
             ValidateLastName(newLastName);
-
             UpdateMetadata(newName, newDescription, this.Code);
-
             LastName = newLastName.Trim();
         }
 

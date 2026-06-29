@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PiolAPIS_Repository.Domain.Entities
 {
-    public class TemplateDTOs : Base
+    public class TemplatesDTOs : Base
     {
         public char RequestType { get; set; } //Si es Post, Put, etc
         public string Request { get; set; } //Estructura completa con las propiedades para peticiones POST
@@ -12,9 +12,9 @@ namespace PiolAPIS_Repository.Domain.Entities
         public bool IsShared { get; set; } //Indica si se podrà implementar en otras o no
         public string? Tags { get; set; } //Palabras clave para filtrar
 
-        protected TemplateDTOs() : base() { }
+        protected TemplatesDTOs() : base() { }
 
-        public TemplateDTOs(
+        public TemplatesDTOs(
             Guid? id,
             string name,
             string description,
