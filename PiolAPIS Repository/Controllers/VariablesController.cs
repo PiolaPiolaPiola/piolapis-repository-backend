@@ -43,8 +43,8 @@ namespace PiolAPIS_Repository.Controllers
                 id: null,
                 name: request.Name,
                 description: request.Description,
-                type: request.Type,
-                code: request.Code,
+                type: null,
+                code: null,
                 isActive: true,
                 createdDate: null,
                 updatedDate: null,
@@ -58,9 +58,15 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Variables>>> Get()
+        public async Task<ActionResult<IEnumerable<Variables>>> Get([FromQuery] bool? includeInactive = false)
         {
             var variables = await _getAllVariablesUseCase.Execute();
+
+            if (!includeInactive.Value)
+            {
+                variables = variables.Where(v => v.IsActive);
+            }
+
             return Ok(variables);
         }
 

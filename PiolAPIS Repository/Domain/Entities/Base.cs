@@ -6,7 +6,7 @@
         public string Name { get; set; } = string.Empty;
         public string Description { get;  set; } = string.Empty;
         public char? Type { get; set; }
-        public string Code { get; set; } = string.Empty;
+        public string? Code { get; set; } = string.Empty;
         public bool IsActive { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
@@ -26,7 +26,7 @@
             Code = code ?? string.Empty;
             IsActive = isActive;
             CreatedDate = createdDate ?? DateTime.UtcNow;
-            UpdatedDate = updatedDate;
+            UpdatedDate = updatedDate ?? DateTime.UtcNow;
         }
 
         public void UpdateMetadata(string name, string description, string code)

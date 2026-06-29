@@ -22,21 +22,43 @@ builder.Services.AddScoped<GetUserByIdUseCase>();
 builder.Services.AddScoped<DeleteUserUseCase>();
 builder.Services.AddScoped<ChangeUserStatusUseCase>();
 builder.Services.AddScoped<GetAllUsersByRoleUseCase>();
+builder.Services.AddScoped<GetAllUsersUseCase>();
+builder.Services.AddScoped<UpdateUserUseCase>();
 
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<CreateProjectUseCase>();
+builder.Services.AddScoped<DeleteProjectUseCase>();
+builder.Services.AddScoped<GetAllProjectsUseCase>();
+builder.Services.AddScoped<GetProjectByIdUseCase>();
+builder.Services.AddScoped<UpdateProjectUseCase>();
 
 builder.Services.AddScoped<IDocumentationRepository, DocumentationRepository>();
 builder.Services.AddScoped<CreateDocumentationUseCase>();
+builder.Services.AddScoped<ChangeDocumentationStatusUseCase>();
+builder.Services.AddScoped<DeleteDocumentationUseCase>();
+builder.Services.AddScoped<GetAllDocumentationsUseCase>();
+builder.Services.AddScoped<GetDocumentationByIdUseCase>();
+builder.Services.AddScoped<UpdateDocumentationUseCase>();
 
 builder.Services.AddScoped<IVariableRepository, VariableRepository>();
 builder.Services.AddScoped<CreateVariableUseCase>();
+builder.Services.AddScoped<ChangeVariableStatusUseCase>();
+builder.Services.AddScoped<DeleteVariableUseCase>();
+builder.Services.AddScoped<GetAllVariablesUseCase>();
+builder.Services.AddScoped<GetVariableByIdUseCase>();
+builder.Services.AddScoped<UpdateVariableUseCase>();
 
 builder.Services.AddScoped<ICodeMessageRepository, CodeMessageRepository>();
 builder.Services.AddScoped<CreateCodeMessageUseCase>();
+builder.Services.AddScoped<GetCodeMessageByIdUseCase>();
 
 builder.Services.AddScoped<IDocumentationSettingRepository, DocumentationSettingRepository>();
 builder.Services.AddScoped<CreateDocumentationSettingUseCase>();
+builder.Services.AddScoped<ChangeDocumentationSettingStatusUseCase>();
+builder.Services.AddScoped<DeleteDocumentationSettingUseCase>();
+builder.Services.AddScoped<GetAllDocumentationSettingsUseCase>();
+builder.Services.AddScoped<GetDocumentationSettingByIdUseCase>();
+builder.Services.AddScoped<UpdateDocumentationSettingUseCase>();
 
 builder.Services.AddScoped<ITemplatesDTOsRepository, TemplatesDTOsRepository>();
 builder.Services.AddScoped<CreateTemplatesDTOsUseCase>();

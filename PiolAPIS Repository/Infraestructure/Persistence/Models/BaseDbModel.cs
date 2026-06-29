@@ -4,8 +4,6 @@ namespace PiolAPIS_Repository.Infraestructure.Persistence.Models
 {
     public class BaseDbModel
     {
-        public Guid? Id { get; set; }
-
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;

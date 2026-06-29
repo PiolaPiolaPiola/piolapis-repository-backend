@@ -44,7 +44,7 @@ namespace PiolAPIS_Repository.Controllers
                 id: null,
                 name: request.Name,
                 description: request.Description,
-                type: request.Type,
+                type: null,
                 code: request.Code,
                 isActive: true,
                 createdDate: null,
@@ -57,9 +57,15 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Projects>>> Get()
+        public async Task<ActionResult<IEnumerable<Projects>>> Get([FromQuery] bool? includeInactive = false)
         {
             var proyectos = await _getAllProjectsUseCase.Execute();
+
+            if (!includeInactive.Value)
+            {
+                proyectos = proyectos.Where(u => u.IsActive);
+            }
+
             return Ok(proyectos);
         }
 

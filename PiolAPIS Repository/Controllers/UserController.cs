@@ -16,7 +16,7 @@ namespace PiolAPIS_Repository.Controllers
         private readonly UpdateUserUseCase _updateUserUseCase;
         private readonly DeleteUserUseCase _deleteUserUseCase;
         private readonly ChangeUserStatusUseCase _changeUserStatusUseCase;
-        private readonly IUserRepository _userRepository; 
+        private readonly GetAllUsersUseCase _getAllUsersUseCase;
 
         public UserController(
             CreateUserUseCase createUserUseCase,
@@ -25,7 +25,7 @@ namespace PiolAPIS_Repository.Controllers
             UpdateUserUseCase updateUserUseCase,
             DeleteUserUseCase deleteUserUseCase,
             ChangeUserStatusUseCase changeUserStatusUseCase,
-            IUserRepository userRepository)
+            GetAllUsersUseCase getAllUsersUseCase)
         {
             _createUserUseCase = createUserUseCase;
             _getUserByIdUseCase = getUserByIdUseCase;
@@ -33,7 +33,7 @@ namespace PiolAPIS_Repository.Controllers
             _updateUserUseCase = updateUserUseCase;
             _deleteUserUseCase = deleteUserUseCase;
             _changeUserStatusUseCase = changeUserStatusUseCase;
-            _userRepository = userRepository;
+            _getAllUsersUseCase = getAllUsersUseCase;
         }
 
         [HttpPost]
@@ -46,8 +46,8 @@ namespace PiolAPIS_Repository.Controllers
                 id: null,
                 name: request.Name,
                 description: request.Description,
-                type: request.Type,
-                code: request.Code,
+                type: null,
+                code: null,
                 isActive: true,
                 createdDate: null,
                 updatedDate: null,
@@ -99,13 +99,37 @@ namespace PiolAPIS_Repository.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Users>>> Get([FromQuery] string rol)
+        public async Task<ActionResult<IEnumerable<Users>>> Get([FromQuery] string? rol = null, bool? includeInactive = false)
         {
-            if (string.IsNullOrWhiteSpace(rol))
-                return BadRequest("El parámetro 'rol' es obligatorio para la búsqueda.");
+            IEnumerable<Users> usuarios = new List<Users>();
 
-            var usuarios = await _getAllUsersByRoleUseCase.Execute(rol);
+            if (string.IsNullOrWhiteSpace(rol))
+            {
+                usuarios = await _getAllUsersUseCase.Execute();
+            }
+            else
+            {
+                usuarios = await _getAllUsersByRoleUseCase.Execute(rol);
+            }
+
+            if (!includeInactive.Value)
+            {
+                usuarios = usuarios.Where(u => u.IsActive);
+            }
+
             return Ok(usuarios);
+        }
+
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            var usuarioExistente = await _getUserByIdUseCase.Execute(id);
+
+            if (usuarioExistente == null)
+                return NotFound($"No se encontró el usuario con ID: {id}");
+
+            await _deleteUserUseCase.Execute(id);
+            return NoContent();
         }
     }
 }

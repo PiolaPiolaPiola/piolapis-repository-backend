@@ -5,8 +5,6 @@
         public record CreateVariableRequest(
             string Name,
             string Description,
-            string Code,
-            char? Type,
             string DataType,
             string? ExampleValue
         );

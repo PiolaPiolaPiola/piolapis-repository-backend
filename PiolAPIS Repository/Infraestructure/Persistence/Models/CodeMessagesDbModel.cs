@@ -1,12 +1,25 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PiolAPIS_Repository.Infraestructure.Persistence.Models
 {
-    [Table("CodeMessages")]
+    [Table("codemessages")]
     public class CodeMessagesDbModel : BaseDbModel
     {
-        public string HttpCode { get; set; }
-        public string Response { get; set; }
+        public CodeMessagesDbModel() { }
+
+        [Key]
+        public Guid? Id { get; set; }
+
+        [Required]
+        [StringLength(3)]
+        public string HttpCode { get; set; } = string.Empty;
+
+        [Required]
+        public string Response { get; set; } = string.Empty;
+
+        [Required]
         public char ResponseType { get; set; }
     }
 }

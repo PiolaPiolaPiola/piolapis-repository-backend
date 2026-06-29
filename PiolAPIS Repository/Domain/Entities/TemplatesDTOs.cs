@@ -1,16 +1,16 @@
-﻿using PiolAPIS_Repository.Domain.Entities.Enums;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Domain.Entities
 {
     public class TemplatesDTOs : Base
     {
-        public char RequestType { get; set; } //Si es Post, Put, etc
-        public string Request { get; set; } //Estructura completa con las propiedades para peticiones POST
-        public string Response { get; set; } //Estructura completa con las propiedades
-        public char ResponseType { get; set; } //Si es schema, JSON, etc
-        public bool IsShared { get; set; } //Indica si se podrà implementar en otras o no
-        public string? Tags { get; set; } //Palabras clave para filtrar
+        public char RequestType { get; private set; }
+        public string Request { get; private set; } = string.Empty;
+        public string Response { get; private set; } = string.Empty;
+        public char ResponseType { get; private set; }
+        public bool IsShared { get; private set; }
+        public string? Tags { get; private set; }
 
         protected TemplatesDTOs() : base() { }
 
@@ -18,6 +18,8 @@ namespace PiolAPIS_Repository.Domain.Entities
             Guid? id,
             string name,
             string description,
+            char? type,
+            string code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,
@@ -27,6 +29,7 @@ namespace PiolAPIS_Repository.Domain.Entities
             char responseType,
             bool isShared,
             string? tags)
+            : base(id, name, description, type, code, isActive, createdDate, updatedDate)
         {
             ValidateRequestType(requestType);
             ValidateResponseType(responseType);
@@ -48,12 +51,14 @@ namespace PiolAPIS_Repository.Domain.Entities
             Request = request.Trim();
             Response = response.Trim();
             ResponseType = char.ToUpperInvariant(responseType);
+            UpdatedDate = DateTime.UtcNow;
         }
 
         public void UpdateSharing(bool isShared, string? newTags)
         {
             IsShared = isShared;
             Tags = newTags?.Trim();
+            UpdatedDate = DateTime.UtcNow;
         }
 
         private static void ValidateRequestType(char requestType)

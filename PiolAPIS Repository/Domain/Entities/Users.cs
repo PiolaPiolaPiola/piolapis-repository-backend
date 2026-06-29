@@ -14,7 +14,7 @@
             string name,
             string description,
             char? type,
-            string code,
+            string? code,
             bool isActive,
             DateTime? createdDate,
             DateTime? updatedDate,

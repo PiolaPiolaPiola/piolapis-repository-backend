@@ -5,10 +5,8 @@
         public record CreateUserRequest(
             string Name, 
             string LastName, 
-            string Description, 
-            string Role, 
-            string Code, 
-            char? Type
+            string? Description, 
+            string Role
         );
 
         public record UpdateUserRequest(

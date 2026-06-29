@@ -5,8 +5,7 @@
         public record CreateProjectRequest(
             string Name,
             string Description,
-            string Code,
-            char? Type
+            string Code
         );
 
         public record UpdateProjectRequest(
