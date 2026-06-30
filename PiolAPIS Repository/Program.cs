@@ -74,9 +74,13 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("FrontendCorsPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173") 
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:5173",
+            "https://019f15d7-7261-74a5-9a69-015663f45cc2-piolapis.linapps.online",
+            "https://piolapis.linapps.online"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
