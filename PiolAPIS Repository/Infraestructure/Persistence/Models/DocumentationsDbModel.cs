@@ -18,11 +18,19 @@ namespace PiolAPIS_Repository.Infraestructure.Persistence.Models
         [Required]
         public Guid ConfiguracionDocumentacionId { get; set; }
 
-        [Required]
-        public Guid PlantillaDtoId { get; set; }
+        public Guid? PlantillaDtoIdRequest { get; set; }
+        public Guid? PlantillaDtoResponse { get; set; }
 
         [Required]
         [StringLength(20)]
         public string Version { get; set; } = "1.0.0";
+
+        public string? EndpointEspecifico { get; set; }
+
+        public string? Parametros { get; set; }
+
+        public string? MensajesError { get; set; }
+
+        public bool IsPublic { get; set; }
     }
 }

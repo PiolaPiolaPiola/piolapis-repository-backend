@@ -5,8 +5,6 @@
         public record CreateDocumentationSettingRequest(
             string Name,
             string Description,
-            string Code,
-            char? Type,
             string BaseEndpoint,
             char ApiType,
             Guid ProyectoId

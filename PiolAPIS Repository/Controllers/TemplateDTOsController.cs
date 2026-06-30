@@ -1,118 +1,159 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using PiolAPIS_Repository.Application.Ports.TemplateDTO;
+using PiolAPIS_Repository.Application.Ports.DTOs;
 using PiolAPIS_Repository.Domain.Entities;
-using PiolAPIS_Repository.Domain.Entities.Enums;
 
 namespace PiolAPIS_Repository.Controllers
 {
     [ApiController]
-    [Route("api/v1/plantillas-dtos")]
-    public class TemplateDTOsController : Controller
+    [Route("api/[controller]")]
+    public class TemplateDTOsController : ControllerBase
     {
-        //[HttpPost]
-        //public async Task<ActionResult<TemplatesDTOs>> Post([FromBody] TemplatesDTOs modelo)
-        //{
-        //    if (modelo == null)
-        //        return BadRequest("El cuerpo de la petición no puede ser nulo.");
+        private readonly CreateTemplatesDTOsUseCase _createUseCase;
+        private readonly GetTemplateByIdUseCase _getByIdUseCase;
+        private readonly GetAllTemplatesUseCase _getAllUseCase;
+        private readonly UpdateTemplateUseCase _updateUseCase;
+        private readonly DeleteTemplateUseCase _deleteUseCase;
+        private readonly ChangeTemplateStatusUseCase _changeStatusUseCase;
 
-        //    modelo.Id ??= Guid.NewGuid();
-        //    modelo.CreatedDate = DateTime.UtcNow;
-        //    modelo.UpdatedDate = DateTime.UtcNow;
+        public TemplateDTOsController(
+            CreateTemplatesDTOsUseCase createUseCase,
+            GetTemplateByIdUseCase getByIdUseCase,
+            GetAllTemplatesUseCase getAllUseCase,
+            UpdateTemplateUseCase updateUseCase,
+            DeleteTemplateUseCase deleteUseCase,
+            ChangeTemplateStatusUseCase changeStatusUseCase)
+        {
+            _createUseCase = createUseCase;
+            _getByIdUseCase = getByIdUseCase;
+            _getAllUseCase = getAllUseCase;
+            _updateUseCase = updateUseCase;
+            _deleteUseCase = deleteUseCase;
+            _changeStatusUseCase = changeStatusUseCase;
+        }
 
-        //    // TODO: Persistir en la base de datos
-        //    // await _repository.InsertAsync(modelo);
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] TemplateDTOs.CreateTemplateRequest request)
+        {
+            if (request == null)
+                return BadRequest("El cuerpo de la petición no puede estar vacío.");
 
-        //    return CreatedAtAction(nameof(GetById), new { id = modelo.Id }, modelo);
-        //}
+            var nuevaPlantilla = new TemplatesDTOs(
+                id: null,
+                name: request.Name,
+                description: request.Description,
+                type: request.Type,
+                code: request.Code,
+                isActive: true,
+                createdDate: null,
+                updatedDate: null,
+                requestType: request.RequestType,
+                request: request.Request,
+                response: request.Response,
+                responseType: request.ResponseType,
+                isShared: request.IsShared,
+                tags: request.Tags
+            );
 
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<TemplatesDTOs>>> Get([FromQuery] char? language, [FromQuery] string? tag)
-        //{
-        //    // TODO: Implementar búsqueda con LINQ eficiente usando los nuevos campos
-        //    // IQueryable<PlantillasDTOs> query = _repository.AsQueryable().Where(p => p.IsShared);
-        //    // if (language.HasValue) query = query.Where(p => p.LanguageType == language.Value);
-        //    // if (!string.IsNullOrEmpty(tag)) query = query.Where(p => p.Tags.Contains(tag));
-        //    // var lista = await query.ToListAsync();
+            await _createUseCase.Execute(nuevaPlantilla);
 
-        //    List<TemplatesDTOs> listaSimulada = [];
+            return CreatedAtAction(nameof(GetById), new { id = nuevaPlantilla.Id }, nuevaPlantilla);
+        }
 
-        //    return Ok(listaSimulada);
-        //}
+        [HttpGet("{id:guid}")]
+        public async Task<ActionResult<TemplatesDTOs>> GetById([FromRoute] Guid id)
+        {
+            try
+            {
+                var plantilla = await _getByIdUseCase.Execute(id);
+                return Ok(plantilla);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
-        //[HttpGet("{id:guid}")]
-        //public async Task<ActionResult<TemplatesDTOs>> GetById([FromRoute] Guid id)
-        //{
-        //    // TODO: Buscar plantilla en base de datos por ID
-        //    // var plantilla = await _repository.GetByIdAsync(id);
-        //    // if (plantilla == null) return NotFound($"No se encontró la plantilla con ID: {id}");
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TemplatesDTOs>>> Get([FromQuery] bool? includeInactive = false)
+        {
+            var plantillas = await _getAllUseCase.Execute();
 
-        //    TemplatesDTOs modeloSimulado = new TemplatesDTOs(
-        //            id: id,
-        //            name: "PagedResponseDTO",
-        //            description: "Estructura estándar global para respuestas paginadas en la organización.",
-        //            isActive: true,
-        //            createdDate: DateTime.UtcNow.AddDays(-5),
-        //            updatedDate: DateTime.UtcNow,
-        //            requestType: (char)RequestType.GET, 
-        //            request: string.Empty,
-        //            response: "{ \"PageNumber\": 1, \"PageSize\": 10, \"TotalRecords\": 100, \"Data\": [] }",
-        //            responseType: (char)DocumentationType.JSON, 
-        //            isShared: true,
-        //            tags: "Pagination,Standard"
-        //        );
+            if (!includeInactive.Value)
+            {
+                plantillas = plantillas.Where(p => p.IsActive);
+            }
+            return Ok(plantillas);
+        }
 
-        //    return Ok(modeloSimulado);
-        //}
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] TemplateDTOs.UpdateTemplateRequest request)
+        {
+            if (request == null)
+                return BadRequest("El cuerpo de la petición no puede estar vacío.");
 
-        //[HttpPut("{id:guid}")]
-        //public async Task<IActionResult> Put([FromRoute] Guid id, [FromBody] TemplatesDTOs modelo)
-        //{
-        //    if (id != modelo.Id)
-        //        return BadRequest("El ID de la ruta no coincide con el ID de la plantilla provista.");
+            try
+            {
+                var plantillaExistente = await _getByIdUseCase.Execute(id);
 
-        //    modelo.UpdatedDate = DateTime.UtcNow;
+                var plantillaActualizada = new TemplatesDTOs(
+                    id: id,
+                    name: request.Name,
+                    description: request.Description,
+                    type: request.Type,
+                    code: request.Code,
+                    isActive: plantillaExistente.IsActive, 
+                    createdDate: plantillaExistente.CreatedDate, 
+                    updatedDate: DateTime.UtcNow, 
+                    requestType: request.RequestType,
+                    request: request.Request,
+                    response: request.Response,
+                    responseType: request.ResponseType,
+                    isShared: plantillaExistente.IsShared, 
+                    tags: request.Tags
+                );
 
-        //    // var actualizado = await _repository.UpdateAsync(modelo);
-        //    // if (!actualizado) return NotFound();
+                await _updateUseCase.Execute(plantillaActualizada);
 
-        //    return NoContent();
-        //}
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-        //[HttpDelete("{id:guid}")]
-        //public async Task<IActionResult> Delete([FromRoute] Guid id)
-        //{
-        //    // var eliminado = await _repository.DeletePhysicalAsync(id);
-        //    // if (!eliminado) return NotFound();
+        [HttpPatch("{id:guid}/status")]
+        public async Task<IActionResult> PatchEstado([FromRoute] Guid id, [FromBody] UserDTOs.ChangeStatusRequest request)
+        {
+            var modificado = await _changeStatusUseCase.Execute(id, request.IsActive);
+            if (!modificado)
+                return NotFound($"No se pudo cambiar el estado. No existe la plantilla con ID: {id}");
 
-        //    return NoContent();
-        //}
+            return NoContent();
+        }
 
-        ////[HttpPost("importar-estructura")]
-        ////[Consumes("multipart/form-data")]
-        ////public async Task<ActionResult<TemplatesDTOs>> ImportarEstructura([FromForm] TemplatesDTOs modelo)
-        ////{
-        ////    if (modelo.File == null || modelo.File.Length == 0)
-        ////        return BadRequest("Se debe adjuntar un archivo válido para extraer la estructura.");
-
-        ////    try
-        ////    {
-        ////        using var stream = modelo.File.OpenReadStream();
-        ////        using var reader = new StreamReader(stream);
-        ////        string contenidoArchivo = await reader.ReadToEndAsync();
-
-        ////        // var contratoExtraido = _contractParser.Parse(contenidoArchivo);
-
-        ////        modelo.RequestType = (char)RequestType.POST;
-        ////        modelo.Request = "{ \"id\": 0, \"nombre\": \"string\" }"; // Extraído del archivo
-        ////        modelo.Response = "{ \"status\": \"success\", \"data\": { \"id\": 123 } }"; // Extraído del archivo
-        ////        modelo.ResponseType = (char)DocumentationType.JSON;
-        ////        modelo.Name = Path.GetFileNameWithoutExtension(modelo.File.FileName);
-
-        ////        return Ok(modelo);
-        ////    }
-        ////    catch (Exception ex)
-        ////    {
-        ////        return StatusCode(StatusCodes.Status500InternalServerError, $"Error al leer el contrato de la API: {ex.Message}");
-        ////    }
-        ////}
+        [HttpDelete("{id:guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id)
+        {
+            try
+            {
+                await _getByIdUseCase.Execute(id);
+                await _deleteUseCase.Execute(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }

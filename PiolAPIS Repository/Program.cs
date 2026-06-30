@@ -62,6 +62,11 @@ builder.Services.AddScoped<UpdateDocumentationSettingUseCase>();
 
 builder.Services.AddScoped<ITemplatesDTOsRepository, TemplatesDTOsRepository>();
 builder.Services.AddScoped<CreateTemplatesDTOsUseCase>();
+builder.Services.AddScoped<GetTemplateByIdUseCase>();
+builder.Services.AddScoped<GetAllTemplatesUseCase>();
+builder.Services.AddScoped<UpdateTemplateUseCase>();
+builder.Services.AddScoped<DeleteTemplateUseCase>();
+builder.Services.AddScoped<ChangeTemplateStatusUseCase>();
 
 builder.Services.AddOpenApi();
 
@@ -95,5 +100,24 @@ app.UseAuthorization();
 app.UseCors("FrontendCorsPolicy");
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<PiolapisDbContext>();
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            Console.WriteLine("--> Aplicando migraciones pendientes en Supabase...");
+            context.Database.Migrate();
+            Console.WriteLine("--> ¡Migraciones aplicadas con éxito!");
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"--> Error al aplicar migraciones automáticas: {ex.Message}");
+    }
+}
 
 app.Run();

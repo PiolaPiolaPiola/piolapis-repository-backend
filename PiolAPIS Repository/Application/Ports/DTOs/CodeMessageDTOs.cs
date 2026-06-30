@@ -5,8 +5,6 @@
         public record CreateCodeMessageRequest(
             string Name,
             string Description,
-            string Code,
-            char? Type,
             string HttpCode,
             string Response,
             char ResponseType

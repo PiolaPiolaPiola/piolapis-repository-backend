@@ -29,7 +29,8 @@ namespace PiolAPIS_Repository.Infraestructure.Adapters
                 UpdatedDate = documentation.UpdatedDate,
                 ProyectoId = documentation.ProyectoId,
                 ConfiguracionDocumentacionId = documentation.ConfiguracionDocumentacionId,
-                PlantillaDtoId = documentation.PlantillaDtoId,
+                PlantillaDtoIdRequest = documentation.PlantillaDtoIdRequest,
+                PlantillaDtoResponse = documentation.PlantillaDtoResponse,
                 Version = documentation.Version
             };
 
@@ -51,8 +52,13 @@ namespace PiolAPIS_Repository.Infraestructure.Adapters
             dbModel.UpdatedDate = documentation.UpdatedDate;
             dbModel.ProyectoId = documentation.ProyectoId;
             dbModel.ConfiguracionDocumentacionId = documentation.ConfiguracionDocumentacionId;
-            dbModel.PlantillaDtoId = documentation.PlantillaDtoId;
+            dbModel.PlantillaDtoResponse = documentation.PlantillaDtoResponse;
+            dbModel.PlantillaDtoIdRequest = documentation.PlantillaDtoIdRequest;
             dbModel.Version = documentation.Version;
+            dbModel.EndpointEspecifico = documentation.EndpointEspecifico;
+            dbModel.Parametros = documentation.Parametros;
+            dbModel.MensajesError = documentation.MensajesError;
+            dbModel.IsPublic = documentation.IsPublic;
 
             _context.Documentations.Update(dbModel);
             await _context.SaveChangesAsync();
@@ -127,8 +133,13 @@ namespace PiolAPIS_Repository.Infraestructure.Adapters
                 updatedDate: dbModel.UpdatedDate,
                 proyectoId: dbModel.ProyectoId,
                 configuracionDocumentacionId: dbModel.ConfiguracionDocumentacionId,
-                plantillaDtoId: dbModel.PlantillaDtoId,
-                version: dbModel.Version
+                plantillaDtoIdRequest: dbModel.PlantillaDtoIdRequest,
+                plantillaDtoIdResponse: dbModel.PlantillaDtoResponse,
+                version: dbModel.Version,
+                endpointEspecifico: dbModel.EndpointEspecifico,
+                parametros: dbModel.Parametros,
+                mensajesError: dbModel.MensajesError,
+                isPublic: dbModel.IsPublic
             );
         }
     }

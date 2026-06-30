@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PiolAPIS_Repository.Infraestructure.Persistence;
@@ -11,9 +12,11 @@ using PiolAPIS_Repository.Infraestructure.Persistence;
 namespace PiolAPIS_Repository.Migrations
 {
     [DbContext(typeof(PiolapisDbContext))]
-    partial class PiolapisDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260630055515_AddNuevasColumnasDocumentation")]
+    partial class AddNuevasColumnasDocumentation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,10 +162,7 @@ namespace PiolAPIS_Repository.Migrations
                     b.Property<string>("Parametros")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("PlantillaDtoIdRequest")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("PlantillaDtoResponse")
+                    b.Property<Guid>("PlantillaDtoId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("ProyectoId")

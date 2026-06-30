@@ -43,15 +43,20 @@ namespace PiolAPIS_Repository.Controllers
                 id: null,
                 name: request.Name,
                 description: request.Description,
-                type: request.Type,
-                code: request.Code,
+                type: null,
+                code: null,
                 isActive: true,
                 createdDate: null,
                 updatedDate: null,
                 proyectoId: request.ProyectoId,
                 configuracionDocumentacionId: request.ConfiguracionDocumentacionId,
-                plantillaDtoId: request.PlantillaDtoId,
-                version: request.Version
+                plantillaDtoIdRequest: request.PlantillaDtoIdRequest,
+                plantillaDtoIdResponse: request.PlantillaDtoResponse,
+                version: request.Version,
+                endpointEspecifico: request.EndpointEspecifico,
+                parametros: request.Parametros,
+                mensajesError: request.MensajesError,
+                isPublic: request.IsPublic
             );
 
             await _createDocumentationUseCase.Execute(nuevaDocumentacion);
@@ -86,10 +91,20 @@ namespace PiolAPIS_Repository.Controllers
             try
             {
                 var docExistente = await _getDocumentationByIdUseCase.Execute(id);
+
                 if (docExistente == null)
                     return NotFound($"No existe documentación con el ID: {id}");
 
-                docExistente.UpdateDocumentation(request.Name, request.Description, request.Version, request.PlantillaDtoId);
+                docExistente.UpdateDocumentation(
+                    request.Name,
+                    request.Description,
+                    request.Version,
+                    request.PlantillaDtoIdRequest,
+                    request.PlantillaDtoResponse,
+                    request.EndpointEspecifico,
+                    request.Parametros,
+                    request.MensajesError
+                );
 
                 await _updateDocumentationUseCase.Execute(docExistente);
 

@@ -42,18 +42,6 @@ namespace PiolAPIS_Repository.Domain.Entities
             Tags = tags?.Trim();
         }
 
-        public void LoadContracts(char requestType, string request, string response, char responseType)
-        {
-            ValidateRequestType(requestType);
-            ValidateResponseType(responseType);
-
-            RequestType = char.ToUpperInvariant(requestType);
-            Request = request.Trim();
-            Response = response.Trim();
-            ResponseType = char.ToUpperInvariant(responseType);
-            UpdatedDate = DateTime.UtcNow;
-        }
-
         public void UpdateSharing(bool isShared, string? newTags)
         {
             IsShared = isShared;
